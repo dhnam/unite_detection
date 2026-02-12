@@ -1,0 +1,36 @@
+[project]
+name = "unite-detection"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "LegenDUST", email = "dhnam0502@naver.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "jaxtyping>=0.3.7",
+    "lightning>=2.6.1",
+    "matplotlib>=3.10.8",
+    "opencv-python>=4.13.0.92",
+    "pandas>=3.0.0",
+    "pillow>=12.1.0",
+    "plotly>=6.5.2",
+    "pydantic>=2.12.5",
+    "scikit-learn>=1.8.0",
+    "seaborn>=0.13.2",
+    "torch==2.10.0",
+    "torchcodec==0.10.0",
+    "torchvision>=0.25.0",
+    "transformers>=5.1.0",
+    "wandb>=0.24.2",
+]
+
+[project.optional-dependencies]
+flash-attn = ["flash-attn"]
+
+[tool.ruff.lint]
+ignore = ["F722", "F821"]
+
+[build-system]
+requires = ["uv_build>=0.10.1,<0.11.0"]
+build-backend = "uv_build"
