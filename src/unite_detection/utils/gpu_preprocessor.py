@@ -14,7 +14,7 @@ class GPUSigLIPProcessor:
         # 1. 리사이즈 설정: Bilinear + Antialias=True가 핵심
         # Fast 프로세서가 텐서를 처리할 때 사용하는 로직과 일치시킵니다.
         self.resize = v2.Resize(
-            size=(config.size["height"], config.size["width"]),
+            size=(config.size["height"], config.size["width"]),  # ty:ignore[unresolved-attribute]
             interpolation=v2.InterpolationMode.BILINEAR,  # resample=2
             antialias=True,  # 오차를 줄이는 가장 중요한 설정
         )

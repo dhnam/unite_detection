@@ -1,4 +1,5 @@
-from typing import NamedTuple, Callable
+from pathlib import Path
+from typing import Callable, NamedTuple
 
 from jaxtyping import Float
 from pydantic import BaseModel, Field, model_validator
@@ -66,7 +67,31 @@ class UNITEClassifierConfig(BaseModel):
 class DatasetConfig(BaseModel):
     num_frames: int = 32
     size: tuple[int, int] = (384, 384)
-    device: str = 'cpu'
+    device: str = "cpu"
     encoder_model: str = "google/siglip2-base-patch16-384"
     cpu_preprocess: bool = True
     transform: Callable | None = None
+
+
+class DataLoaderConfig(BaseModel):
+    batch_size: int = 32
+    num_workers: int = 8
+    prefetch_factor: int | None = 1
+    pin_memory: bool = True
+    persistent_workers: bool = True
+
+
+class DataModuleConfig(BaseModel):
+    celeb_df_preprocess_path: Path = Path("/content/preprocessed")
+    from_img: bool = True
+    val_split_ratio: float = 0.1
+    use_gta_v: bool = True
+    gta_v_preprocess_path: Path = Path("/content/gta_v_preprocessed")
+    gta_v_zip_path: Path = Path("./mini-ref-sailvos.zip")
+    gta_v_down_path: Path = Path("./gta_v")
+    gta_v_gdrive_id: str = "1-0Vu4X-pqb4Da226g1OALHytAlMRCC84"
+    seed: int | None = None
+    do_preprocess: bool = True
+    run_sample: int = 20000
+    loader: DataLoaderConfig = Field(default_factory=DataLoaderConfig)
+    dataset: DatasetConfig = Field(default_factory=DatasetConfig)

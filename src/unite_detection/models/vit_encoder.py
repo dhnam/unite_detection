@@ -13,7 +13,7 @@ def _check_flash_attn() -> bool:
 HAS_FLASH_ATTN = _check_flash_attn()
 flash_attn_func: Callable | None  # pyright: ignore[reportMissingTypeArgument]
 if HAS_FLASH_ATTN:
-    from flash_attn import (  # pyright: ignore[reportMissingImports]
+    from flash_attn import (  # ty:ignore[unresolved-import]
         flash_attn_func,  # pyright: ignore[reportUnknownVariableType]
     )
 else:
