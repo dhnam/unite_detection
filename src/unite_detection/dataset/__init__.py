@@ -5,7 +5,6 @@ from .celeb_df_dataset import (
     CelebDFVideoDataset,
 )
 from .image_processor import ImageProcessor
-from .preprocess import preprocess_celebdf, preprocess_celebdf_frames, preprocess_gta_v
 from .sail_vos_dataset import SailVosDataset
 
 __all__ = [
@@ -15,7 +14,4 @@ __all__ = [
     "CelebDFBaseDataset",
     "CelebDFImageDataset",
     "CelebDFVideoDataset",
-    "preprocess_celebdf",
-    "preprocess_celebdf_frames",
-    "preprocess_gta_v",
 ]
