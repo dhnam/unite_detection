@@ -6,7 +6,7 @@ from pathlib import Path
 from shutil import copy2
 
 import cv2
-from tqdm.notebook import tqdm
+from tqdm.auto import tqdm
 
 
 def resize_single_video(item):
