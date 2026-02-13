@@ -1,9 +1,11 @@
+from __future__ import annotations
 from pathlib import Path
-from typing import Callable, NamedTuple
+from typing import Callable, NamedTuple, Protocol, runtime_checkable, Sequence
 
 from jaxtyping import Float
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, model_validator, ConfigDict, computed_field
 from torch import Tensor
+import torch
 
 
 class UNITEConfig(BaseModel):
@@ -95,3 +97,51 @@ class DataModuleConfig(BaseModel):
     run_sample: int = 20000
     loader: DataLoaderConfig = Field(default_factory=DataLoaderConfig)
     dataset: DatasetConfig = Field(default_factory=DatasetConfig)
+
+
+class VisualizationData(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    logits: Tensor
+    labels: Tensor
+    embeds: Tensor
+    ps: Tensor | None = None
+    cs: Tensor | None = None
+
+    @computed_field  # type: ignore
+    @property
+    def preds(self) -> Tensor:
+        return torch.argmax(self.logits, dim=1)
+
+    @classmethod
+    def from_step_output(cls, output: list[VisualizationData]) -> VisualizationData:
+        if not output:
+            return cls(
+                logits=torch.empty(0),
+                labels=torch.empty(0),
+                embeds=torch.empty(0),
+            )
+
+        return cls(
+            logits=torch.cat([x.logits for x in output], dim=0),
+            labels=torch.cat([x.labels for x in output], dim=0),
+            embeds=torch.cat([x.embeds for x in output], dim=0),
+            ps=torch.cat([x.ps for x in output if x.ps is not None], dim=0),
+            cs=torch.cat([x.cs for x in output if x.cs is not None], dim=0),
+        )
+
+
+@runtime_checkable
+class Visualizable(Protocol):
+    num_cls: int
+    class_names: Sequence[str]
+    num_heads: int
+    val_output: VisualizationData | None
+    test_output: VisualizationData | None
+
+
+class PlotContext(BaseModel):
+    class_names: list[str]
+    stage: str
+    current_epoch: int
+    num_heads: int

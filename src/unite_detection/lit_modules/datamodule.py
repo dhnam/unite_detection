@@ -46,8 +46,6 @@ class DFDataModule(L.LightningDataModule):
             persistent_workers: bool
             prefetch_factor: int | None
 
-        self._loader_param = LoaderParam(**config.loader.model_dump())
-
     @override
     def prepare_data(self):
         path = kagglehub.dataset_download("reubensuju/celeb-df-v2")
@@ -142,14 +140,13 @@ class DFDataModule(L.LightningDataModule):
             )
             test_paths_set: set[str] = set()
             if self.config.from_img:
+                def handler(path: str) -> str:
+                    assert self.celebdf_path is not None
+                    return str(self.celebdf_path / Path(path).with_suffix(""))
                 # 확장자를 떼고 비교해야 함 (이미지 폴더명은 확장자가 없으므로)
                 test_paths_set = set(
                     test_df["path"]
-                    .apply(
-                        lambda x: str(
-                            self.celebdf_path / Path(x).with_suffix("")
-                        ).replace("\\", "/")
-                    )
+                    .apply(handler)
                     .values
                 )
             else:
@@ -295,7 +292,7 @@ class DFDataModule(L.LightningDataModule):
 
         return DataLoader(
             dataset,
-            **self._loader_param,
+            **self.config.loader.model_dump(),
             sampler=sampler,
         )
 
@@ -306,7 +303,7 @@ class DFDataModule(L.LightningDataModule):
             dataset = ConcatDataset([dataset, self.gta_val])
         return DataLoader(
             dataset,
-            **self._loader_param,
+            **self.config.loader.model_dump(),
         )
 
     @override
@@ -316,5 +313,5 @@ class DFDataModule(L.LightningDataModule):
             dataset = ConcatDataset([dataset, self.gta_test])
         return DataLoader(
             dataset,
-            **self._loader_param,
+            **self.config.loader.model_dump(),
         )
