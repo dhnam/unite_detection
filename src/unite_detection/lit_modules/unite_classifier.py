@@ -24,21 +24,19 @@ from unite_detection.schemas import UNITEClassifierConfig, UNITEOutput
 class LitUNITEClassifier(L.LightningModule, Visualizable):
     def __init__(self, config: UNITEClassifierConfig | None = None):
         super().__init__()
-        if config is None:
-            config = UNITEClassifierConfig()
+        self.config = config or UNITEClassifierConfig()
         self.save_hyperparameters(
-            config.model_dump(
+            self.config.model_dump(
                 exclude={
-                    "unite_model": {"num_cls", "num_heads", "num_frames"},
-                    "ad_loss": {"num_cls", "num_heads", "num_frames"},
+                    "unite_model": {"arch"},
+                    "ad_loss": {"arch"},
                 }
             )
         )
 
-        self.config: UNITEClassifierConfig = config
-        self.model: UNITE = UNITE(config.unite_model)
+        self.model: UNITE = UNITE(self.config.unite_model)
         self.ce_loss: nn.Module = nn.CrossEntropyLoss()
-        self.ad_loss: ADLoss = ADLoss(config.ad_loss)
+        self.ad_loss: ADLoss = ADLoss(self.config.ad_loss)
 
         class MetricType(TypedDict):
             task: Literal["multiclass", "binary"]
@@ -47,7 +45,7 @@ class LitUNITEClassifier(L.LightningModule, Visualizable):
 
         metric_param: MetricType = {
             "task": "multiclass",
-            "num_classes": config.num_cls,
+            "num_classes": self.config.arch.num_cls,
             "average": "macro",
         }
 
@@ -66,12 +64,12 @@ class LitUNITEClassifier(L.LightningModule, Visualizable):
 
         self.class_names: list[str] = (
             ["Real", "Fake"]
-            if config.num_cls == 2
-            else [f"Class {i}" for i in range(config.num_cls)]
+            if self.config.arch.num_cls == 2
+            else [f"Class {i}" for i in range(self.config.arch.num_cls)]
         )
         self.val_output: VisualizationData | None = None
         self.test_output: VisualizationData | None = None
-        self.num_heads:int = self.config.num_heads
+        self.num_heads:int = self.config.arch.num_heads
         
         self._val_buffer: list[VisualizationData] = []
         self._test_buffer: list[VisualizationData] = []

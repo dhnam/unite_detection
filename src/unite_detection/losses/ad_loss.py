@@ -20,7 +20,7 @@ class ADLoss(nn.Module):
         # C = torch.zeros(num_cls, num_heads, max_len)
         # Try changing C to random normalization so that it might not collapse due to initial condition.
         c: Float[Tensor, "cls head frame"]
-        c = torch.randn(config.num_cls, config.num_heads, config.num_frames)
+        c = torch.randn(config.arch.num_cls, config.arch.num_heads, config.arch.num_frames)
         c = F.normalize(c, p=2, dim=2)
         self.register_buffer("C", c)
 
@@ -71,7 +71,7 @@ class ADLoss(nn.Module):
 
         # 1. 센터 업데이트 (현재 로직 유지하되 헤드별로 정규화 상태 유지)
         if self.training:
-            for c in range(self.config.num_cls):
+            for c in range(self.config.arch.num_cls):
                 mask: Bool[Tensor, "batch"] = labels == c
                 if mask.any():
                     valid_cls += 1
@@ -92,7 +92,7 @@ class ADLoss(nn.Module):
 
                     mask_triu: Bool[Tensor, "head head"] = torch.triu(
                         torch.ones(
-                            self.config.num_heads, self.config.num_heads, device=device
+                            self.config.arch.num_heads, self.config.arch.num_heads, device=device
                         ),
                         diagonal=1,
                     ).bool()
@@ -127,7 +127,7 @@ class ADLoss(nn.Module):
 
         # 샘플 수와 상관없이 일정한 스케일 유지
         loss_sum = torch.tensor(0.0, device=device)
-        for c in range(self.config.num_cls):
+        for c in range(self.config.arch.num_cls):
             mask_cls: Bool[Tensor, "batch"] = labels == c
             if mask_cls.any():
                 # 해당 클래스 샘플들만의 평균을 구함
@@ -136,7 +136,7 @@ class ADLoss(nn.Module):
                     dist_within[mask_cls] - self.delta_within[c]
                 ).mean()
                 loss_sum += class_loss
-        loss_within = loss_sum / self.config.num_cls  # 클래스당 기여도를 1/N로 고정
+        loss_within = loss_sum / self.config.arch.num_cls  # 클래스당 기여도를 1/N로 고정
 
         if log_detail:
             return loss_within + loss_between, loss_within, loss_between, head_dist_mean

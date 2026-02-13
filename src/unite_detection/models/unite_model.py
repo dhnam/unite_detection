@@ -39,18 +39,18 @@ class UNITE(nn.Module):
         )
 
         self.pos_embedding = TemporalPositionalEncoding(
-            self.embed_size, config.num_frames, config.dropout
+            self.embed_size, config.arch.num_frames, config.dropout
         )
         self.first_encoder = ViTEncoder(
-            self.embed_size, config.num_heads, config.dropout
+            self.embed_size, config.arch.num_heads, config.dropout
         )
         self.encoders = nn.ModuleList(
             [
-                ViTEncoder(self.embed_size, config.num_heads, config.dropout)
+                ViTEncoder(self.embed_size, config.arch.num_heads, config.dropout)
                 for _ in range(3)
             ]
         )
-        self.mlp_head = nn.Linear(self.embed_size, config.num_cls)
+        self.mlp_head = nn.Linear(self.embed_size, config.arch.num_cls)
 
     def forward(
         self,
@@ -115,7 +115,7 @@ class UNITE(nn.Module):
 
             train_in_reshape: Float[Tensor, "batch tot_token head head_dim"]
             train_in_reshape = train_in.reshape(
-                b, -1, self.config.num_heads, d // self.config.num_heads
+                b, -1, self.config.arch.num_heads, d // self.config.arch.num_heads
             )
 
             train_in_permute: Float[Tensor, "batch head tot_token head_dim"]
@@ -125,7 +125,7 @@ class UNITE(nn.Module):
                 attn_output * train_in_permute
             )
             P_reshape: Float[Tensor, "batch head frame token head_dim"]
-            P_reshape = P_val.reshape(b, self.config.num_heads, f, t, -1)
+            P_reshape = P_val.reshape(b, self.config.arch.num_heads, f, t, -1)
             P = P_reshape.mean(dim=(3, 4))
         else:
             transformer_out: Float[Tensor, "batch tot_w_cls embed"] = (

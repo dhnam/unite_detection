@@ -5,7 +5,7 @@ from typing import Callable, NamedTuple, Protocol, Sequence, runtime_checkable
 
 import torch
 from jaxtyping import Float
-from pydantic import BaseModel, ConfigDict, Field, computed_field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, computed_field
 from torch import Tensor
 
 
@@ -14,14 +14,22 @@ class EncoderConfig(BaseModel):
     use_auto_processor: bool = True
 
 
-class UNITEConfig(BaseModel):
-    num_channel: int = 3
+class ArchSchema(BaseModel):
+    """
+        Architecture Schema
+    """
     num_cls: int = 2
     num_heads: int = 12
     num_frames: int = 32
+    img_size: tuple[int, int] = (384, 384)
+    
+
+
+class UNITEConfig(BaseModel):
     dropout: float = 0.1
     use_bfloat: bool = True
     encoder: EncoderConfig = Field(default_factory=EncoderConfig)
+    arch: ArchSchema = Field(default_factory=ArchSchema)
 
 
 class UNITEOutput(NamedTuple):
@@ -31,12 +39,10 @@ class UNITEOutput(NamedTuple):
 
 
 class ADLossConfig(BaseModel):
-    num_cls: int = 2
-    num_heads: int = 12
-    num_frames: int = 32
     delta_within: tuple[float, float] = (0.01, -2.0)
     delta_between: float = 0.5
     eta: float = 0.05
+    arch: ArchSchema = Field(default_factory=ArchSchema)
 
 
 class OptimizerConfig(BaseModel):
@@ -50,32 +56,21 @@ class LossConfig(BaseModel):
 
 
 class UNITEClassifierConfig(BaseModel):
-    num_cls: int = 2
-    num_heads: int = 12
-    num_frames: int = 32
+    arch: ArchSchema = Field(default_factory=ArchSchema)
     unite_model: UNITEConfig = Field(default_factory=UNITEConfig)
     ad_loss: ADLossConfig = Field(default_factory=ADLossConfig)
     optim: OptimizerConfig = Field(default_factory=OptimizerConfig)
     loss: LossConfig = Field(default_factory=LossConfig)
 
-    @model_validator(mode="after")
-    def ensure_param(self):
-        self.unite_model.num_cls = self.num_cls
-        self.unite_model.num_heads = self.num_heads
-        self.unite_model.num_frames = self.num_frames
-
-        self.ad_loss.num_cls = self.num_cls
-        self.ad_loss.num_heads = self.num_heads
-        self.ad_loss.num_frames = self.num_frames
-
-        return self
+    def model_post_init(self, __context):
+        self.unite_model.arch = self.arch
+        self.ad_loss.arch = self.arch
 
 
 class DatasetConfig(BaseModel):
-    num_frames: int = 32
-    size: tuple[int, int] = (384, 384)
     device: str = "cpu"
     transform: Callable | None = None
+    arch: ArchSchema = Field(default_factory=ArchSchema)
     encoder: EncoderConfig = Field(default_factory=EncoderConfig)
 
 

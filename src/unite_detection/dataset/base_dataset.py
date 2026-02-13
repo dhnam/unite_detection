@@ -22,9 +22,7 @@ class DeepFakeBaseDataset(Dataset, ABC):
     def __init__(
         self, paths: Sequence[Path | str], config: DatasetConfig | None = None
     ):
-        if config is None:
-            config = DatasetConfig()
-        self.config = config
+        self.config = config if config else DatasetConfig()
         self.samples: list[Sample] = []
 
         print(f"Processing {len(paths)} paths...")

@@ -45,7 +45,7 @@ class CelebDFVideoDataset(CelebDFBaseDataset):
     def _calculate_num_chunks(self, frame_cnt: int) -> int:
         # Stride=2를 고려한 유효 프레임 기반 계산
         effective_frames = math.ceil(frame_cnt / 2)
-        return math.ceil(effective_frames / self.config.num_frames)
+        return math.ceil(effective_frames / self.config.arch.num_frames)
 
     def __getitem__(self, idx: int):
         meta = self.samples[idx]
@@ -56,10 +56,10 @@ class CelebDFVideoDataset(CelebDFBaseDataset):
             total_frames = decoder.metadata.num_frames or 100000
 
             # Stride 2 적용하여 인덱스 계산
-            start_frame = chunk_idx * self.config.num_frames * 2
+            start_frame = chunk_idx * self.config.arch.num_frames * 2
             indices = [
                 min(start_frame + (i * 2), total_frames - 1)
-                for i in range(self.config.num_frames)
+                for i in range(self.config.arch.num_frames)
             ]
 
             frames_batch = decoder.get_frames_at(indices=indices)
@@ -97,7 +97,7 @@ class CelebDFVideoDataset(CelebDFBaseDataset):
             print(f"Error loading {video_path}: {e}")
             frames_tensor_out: Float[Tensor, "channel batch h w"]
             frames_tensor_out = torch.zeros(
-                (3, self.config.num_frames, self.config.size[1], self.config.size[0]),
+                (3, self.config.arch.num_frames, self.config.arch.img_size[1], self.config.arch.img_size[0]),
                 dtype=torch.float32,
             )
 
@@ -114,7 +114,7 @@ class CelebDFImageDataset(CelebDFBaseDataset):
     ):
         super().__init__(paths, config)
         self.processor = ImageProcessor(
-            CelebDFImageDataset.idx_to_filename, self.config.size
+            CelebDFImageDataset.idx_to_filename, self.config.arch.img_size
         )
 
     @staticmethod

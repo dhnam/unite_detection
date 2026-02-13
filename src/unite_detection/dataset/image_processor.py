@@ -26,7 +26,7 @@ class ImageProcessor:
             return 0
 
     def calculate_num_chunks(self, dataset: DeepFakeBaseDataset, frame_cnt: int) -> int:
-        return math.ceil(frame_cnt / dataset.config.num_frames)
+        return math.ceil(frame_cnt / dataset.config.arch.num_frames)
 
     def getitem(
         self, dataset: DeepFakeBaseDataset, idx: int
@@ -40,9 +40,9 @@ class ImageProcessor:
         )
 
         frames_list: list[Float[Tensor, "channel h w"]] = []
-        start_frame_idx = chunk_idx * dataset.config.num_frames
+        start_frame_idx = chunk_idx * dataset.config.arch.num_frames
 
-        for i in range(dataset.config.num_frames):
+        for i in range(dataset.config.arch.num_frames):
             current_idx = min(start_frame_idx + i, total_frames - 1)
             file_name = self.naming_fn(current_idx)
             img_path = os.path.join(folder_path, file_name)
@@ -86,7 +86,7 @@ class ImageProcessor:
             frames_tensor_out = torch.zeros(
                 (
                     3,
-                    dataset.config.num_frames,
+                    dataset.config.arch.num_frames,
                     dataset.config.size[1],
                     dataset.config.size[0],
                 ),

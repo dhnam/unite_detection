@@ -1,4 +1,5 @@
 from unite_detection.schemas.schemas import (
+    ArchSchema,
     ADLossConfig,
     DataLoaderConfig,
     DataModuleConfig,
@@ -16,6 +17,7 @@ from unite_detection.schemas.schemas import (
 )
 
 __all__ = [
+    "ArchSchema",
     "ADLossConfig",
     "DataLoaderConfig",
     "DataModuleConfig",
