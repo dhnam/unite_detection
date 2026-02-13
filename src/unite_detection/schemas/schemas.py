@@ -1,11 +1,17 @@
 from __future__ import annotations
-from pathlib import Path
-from typing import Callable, NamedTuple, Protocol, runtime_checkable, Sequence
 
-from jaxtyping import Float
-from pydantic import BaseModel, Field, model_validator, ConfigDict, computed_field
-from torch import Tensor
+from pathlib import Path
+from typing import Callable, NamedTuple, Protocol, Sequence, runtime_checkable
+
 import torch
+from jaxtyping import Float
+from pydantic import BaseModel, ConfigDict, Field, computed_field, model_validator
+from torch import Tensor
+
+
+class EncoderConfig(BaseModel):
+    model: str = "google/siglip2-base-patch16-384"
+    use_auto_processer: bool = True
 
 
 class UNITEConfig(BaseModel):
@@ -14,9 +20,8 @@ class UNITEConfig(BaseModel):
     num_heads: int = 12
     num_frames: int = 32
     dropout: float = 0.1
-    encoder_model: str = "google/siglip2-base-patch16-384"
     use_bfloat: bool = True
-    cpu_preprocess: bool = True
+    encoder: EncoderConfig = Field(default_factory=EncoderConfig)
 
 
 class UNITEOutput(NamedTuple):
@@ -70,9 +75,8 @@ class DatasetConfig(BaseModel):
     num_frames: int = 32
     size: tuple[int, int] = (384, 384)
     device: str = "cpu"
-    encoder_model: str = "google/siglip2-base-patch16-384"
-    cpu_preprocess: bool = True
     transform: Callable | None = None
+    encoder: EncoderConfig = Field(default_factory=EncoderConfig)
 
 
 class DataLoaderConfig(BaseModel):
@@ -96,6 +100,7 @@ class DataModuleConfig(BaseModel):
     loader: DataLoaderConfig = Field(default_factory=DataLoaderConfig)
     dataset: DatasetConfig = Field(default_factory=DatasetConfig)
     sampler: SamplerConfig = Field(default_factory=SamplerConfig)
+
 
 class SamplerConfig(BaseModel):
     real_weight: float = 0.4

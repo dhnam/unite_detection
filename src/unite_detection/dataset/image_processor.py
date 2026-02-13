@@ -70,7 +70,7 @@ class ImageProcessor:
             frames_tensor: Float[Tensor, "batch channel h w"] = torch.stack(
                 frames_list, dim=0
             )
-            if dataset.config.cpu_preprocess:
+            if dataset.config.encoder.use_auto_processer:
                 assert dataset.preprocessor is not None
                 processed = cast(
                     BatchFeature,

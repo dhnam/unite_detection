@@ -21,13 +21,13 @@ class UNITE(nn.Module):
 
         dtype = torch.bfloat16 if config.use_bfloat else torch.float16
         self.vis_encoder = AutoModel.from_pretrained(
-            config.encoder_model,
+            config.encoder.model,
             device_map="auto",
             dtype=dtype,
             attn_implementation="flash_attention_2",
         )
         self.embed_size = self.vis_encoder.config.vision_config.hidden_size
-        processor = AutoProcessor.from_pretrained(config.encoder_model, use_fast=True)
+        processor = AutoProcessor.from_pretrained(config.encoder.model, use_fast=True)
         self.processor = GPUSigLIPProcessor(processor)
 
         for para in self.vis_encoder.parameters():
@@ -64,7 +64,7 @@ class UNITE(nn.Module):
         b, _, f, *_ = x.shape
 
         with torch.no_grad():
-            if self.config.cpu_preprocess:
+            if self.config.encoder.use_auto_processer:
                 pixels_int: Int[Tensor, "bf channel h w"] = x.permute(
                     0, 2, 1, 3, 4
                 ).flatten(0, 1)
