@@ -21,7 +21,7 @@ from unite_detection.models import UNITE
 from unite_detection.schemas import UNITEClassifierConfig, UNITEOutput
 
 
-class LitUNITEClassifier(L.LightningModule, Visualizable):
+class LitUNITEClassifier(L.LightningModule):
     def __init__(self, config: UNITEClassifierConfig | None = None):
         super().__init__()
         self.config = config or UNITEClassifierConfig()
@@ -70,6 +70,7 @@ class LitUNITEClassifier(L.LightningModule, Visualizable):
         self.val_output: VisualizationData | None = None
         self.test_output: VisualizationData | None = None
         self.num_heads:int = self.config.arch.num_heads
+        self.num_cls = self.config.arch.num_cls
         
         self._val_buffer: list[VisualizationData] = []
         self._test_buffer: list[VisualizationData] = []
@@ -224,3 +225,6 @@ class LitUNITEClassifier(L.LightningModule, Visualizable):
                 "interval": "step",
             },
         }
+
+
+_: Visualizable = LitUNITEClassifier()

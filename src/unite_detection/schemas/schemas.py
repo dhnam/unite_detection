@@ -28,8 +28,8 @@ class ArchSchema(BaseModel):
 class UNITEConfig(BaseModel):
     dropout: float = 0.1
     use_bfloat: bool = True
-    encoder: EncoderConfig = Field(default_factory=EncoderConfig)
     arch: ArchSchema = Field(default_factory=ArchSchema)
+    encoder: EncoderConfig = Field(default_factory=EncoderConfig)
 
 
 class UNITEOutput(NamedTuple):
