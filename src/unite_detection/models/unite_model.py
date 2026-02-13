@@ -64,7 +64,7 @@ class UNITE(nn.Module):
         b, _, f, *_ = x.shape
 
         with torch.no_grad():
-            if self.config.encoder.use_auto_processer:
+            if self.config.encoder.use_auto_processor:
                 pixels_int: Int[Tensor, "bf channel h w"] = x.permute(
                     0, 2, 1, 3, 4
                 ).flatten(0, 1)

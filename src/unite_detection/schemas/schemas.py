@@ -11,7 +11,7 @@ from torch import Tensor
 
 class EncoderConfig(BaseModel):
     model: str = "google/siglip2-base-patch16-384"
-    use_auto_processer: bool = True
+    use_auto_processor: bool = True
 
 
 class UNITEConfig(BaseModel):

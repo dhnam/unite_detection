@@ -76,7 +76,7 @@ class CelebDFVideoDataset(CelebDFBaseDataset):
                 pixel_value = pixel_value_raw.to(torch.float32)
 
             frames_tensor: Float[Tensor, "batch channel h w"]
-            if self.config.encoder.use_auto_processer:
+            if self.config.encoder.use_auto_processor:
                 assert self.preprocessor is not None
                 processed = cast(
                     BatchFeature,
