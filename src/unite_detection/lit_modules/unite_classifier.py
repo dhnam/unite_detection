@@ -40,14 +40,10 @@ class LitUNITEClassifier(L.LightningModule, Visualizable):
         self.ce_loss: nn.Module = nn.CrossEntropyLoss()
         self.ad_loss: ADLoss = ADLoss(config.ad_loss)
 
-        MetricType = TypedDict(
-            "MetricType",
-            {
-                "task": Literal["multiclass"] | Literal["binary"],
-                "num_classes": NotRequired[int],
-                "average": NotRequired[Literal["macro"]],
-            },
-        )
+        class MetricType(TypedDict):
+            task: Literal["multiclass", "binary"]
+            num_classes: NotRequired[int]
+            average: NotRequired[Literal["macro"]]
 
         metric_param: MetricType = {
             "task": "multiclass",

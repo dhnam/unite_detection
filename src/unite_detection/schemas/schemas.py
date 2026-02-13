@@ -141,7 +141,7 @@ class Visualizable(Protocol):
 
 
 class PlotContext(BaseModel):
-    class_names: list[str]
+    class_names: Sequence[str]
     stage: str
     current_epoch: int
     num_heads: int

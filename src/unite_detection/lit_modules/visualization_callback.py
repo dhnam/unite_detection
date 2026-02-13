@@ -2,7 +2,6 @@ from typing import override
 
 import matplotlib.pyplot as plt
 import pytorch_lightning as L
-import torch
 import wandb
 
 from unite_detection.schemas import PlotContext, Visualizable, VisualizationData
