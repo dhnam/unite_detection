@@ -61,7 +61,7 @@ class ImageProcessor:
             except Exception:
                 frames_list.append(
                     torch.zeros(
-                        (3, dataset.config.size[1], dataset.config.size[0]),
+                        (3, dataset.config.arch.img_size[1], dataset.config.arch.img_size[0]),
                         dtype=torch.float32,
                     )
                 )
@@ -87,8 +87,8 @@ class ImageProcessor:
                 (
                     3,
                     dataset.config.arch.num_frames,
-                    dataset.config.size[1],
-                    dataset.config.size[0],
+                    dataset.config.arch.img_size[1],
+                    dataset.config.arch.img_size[0],
                 ),
                 dtype=torch.float32,
             )

@@ -52,7 +52,7 @@ class CelebDFVideoDataset(CelebDFBaseDataset):
         video_path, chunk_idx, label = meta["path"], meta["chunk_idx"], meta["label"]
 
         try:
-            decoder = VideoDecoder(video_path, device="cpu")
+            decoder = VideoDecoder(video_path, device=self.config.video_decode_device)
             total_frames = decoder.metadata.num_frames or 100000
 
             # Stride 2 적용하여 인덱스 계산

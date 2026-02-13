@@ -68,7 +68,7 @@ class UNITEClassifierConfig(BaseModel):
 
 
 class DatasetConfig(BaseModel):
-    device: str = "cpu"
+    video_decode_device: str = "cpu"
     transform: Callable | None = None
     arch: ArchSchema = Field(default_factory=ArchSchema)
     encoder: EncoderConfig = Field(default_factory=EncoderConfig)
