@@ -23,14 +23,14 @@ from unite_detection.utils import (
 
 
 class AbstractDatasetManager(ABC):
-    train_paths: list[Path]
-    val_paths: list[Path]
-    test_paths: list[Path]
-
     def __init__(self, config: DataModuleConfig):
         self.config = config
         self.root: Path = Path()
         self.train_paths: list[Path]
+
+        self.train_paths: list[Path] = []
+        self.val_paths: list[Path] = []
+        self.test_paths: list[Path] = []
 
     def prepare(self):
         self._prepare_files()

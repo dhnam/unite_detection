@@ -4,9 +4,43 @@ import lightning.pytorch as L
 import torch
 from torch.utils.data import ConcatDataset, DataLoader, Dataset, WeightedRandomSampler
 
-from unite_detection.dataset import SailVosDataset
+from unite_detection.dataset import CelebDFBaseDataset, SailVosDataset
 from unite_detection.lit_modules.dataset_manager import CelebDFManager, GTAManager
-from unite_detection.schemas import DataModuleConfig, DatasetConfig
+from unite_detection.schemas import DataModuleConfig, DatasetConfig, SamplerConfig
+
+
+class SamplerFactory:
+    def __init__(self, config: SamplerConfig | None = None):
+        self.config: SamplerConfig = config or SamplerConfig()
+
+    def create_sampler(
+        self, celeb_train: CelebDFBaseDataset, gta_train: SailVosDataset | None = None
+    ) -> WeightedRandomSampler:
+        celeb_counts = celeb_train.get_label_counter()
+        celeb_weights = (
+            self.config.real_weight / celeb_counts[0],
+            self.config.fake_weight / celeb_counts[1],
+        )
+        sample_weights = [
+            celeb_weights[sample["label"]] for sample in celeb_train.samples
+        ]
+        if gta_train is not None:
+            gta_counts = gta_train.get_label_counter()
+            gta_weight = self.config.gta_weight / gta_counts[1]
+            sample_weights.extend([gta_weight] * len(gta_train))
+
+        gen = None
+        if self.config.seed is not None:
+            gen = torch.Generator()
+            gen.manual_seed(self.config.seed)
+
+        sampler = WeightedRandomSampler(
+            weights=sample_weights,
+            num_samples=min(len(sample_weights), self.config.run_sample),
+            replacement=True,
+            generator=gen,
+        )
+        return sampler
 
 
 class DFDataModule(L.LightningDataModule):
@@ -20,6 +54,7 @@ class DFDataModule(L.LightningDataModule):
         )
         self.celeb_manager = CelebDFManager(self.config)
         self.gta_manager = GTAManager(self.config)
+        self.sampler_factory = SamplerFactory(self.config.sampler)
 
         class LoaderParam(TypedDict):
             batch_size: int
@@ -72,39 +107,15 @@ class DFDataModule(L.LightningDataModule):
                 self.gta_manager.test_paths, test_config, self.gta_manager.ext
             )
 
-    def _get_train_weighted_sampler(self) -> WeightedRandomSampler:
-        celeb_counts = self.celeb_train.get_label_counter()
-        celeb_weights = (
-            self.config.real_sample_weight / celeb_counts[0],
-            self.config.fake_sample_weight / celeb_counts[1],
-        )
-        sample_weights = [
-            celeb_weights[sample["label"]] for sample in self.celeb_train.samples
-        ]
-        dataset: Dataset = self.celeb_train
-        if self.config.use_gta_v:
-            dataset = ConcatDataset([dataset, self.gta_train])
-            gta_counts = self.gta_train.get_label_counter()
-            gta_weight = self.config.gta_sample_weight / gta_counts[1]
-            sample_weights.extend([gta_weight] * len(self.gta_train))
-
-        gen = None
-        if self.config.seed is not None:
-            gen = torch.Generator()
-            gen.manual_seed(self.config.seed)
-
-        sampler = WeightedRandomSampler(
-            weights=sample_weights,
-            num_samples=min(len(sample_weights), self.config.run_sample),
-            replacement=True,
-            generator=gen,
-        )
-        return sampler
-
     @override
     def train_dataloader(self):
         # 2. 현재 훈련 셋(Subset) 내의 클래스별 개수 계산
-        sampler = self._get_train_weighted_sampler()
+        gta = None
+        dataset: Dataset = self.celeb_val
+        if self.config.use_gta_v:
+            gta = self.gta_train
+            dataset = ConcatDataset([dataset, self.gta_val])
+        sampler, dataset = self.sampler_factory.create_sampler(self.celeb_train, gta)
         return DataLoader(
             dataset,
             **self.config.loader.model_dump(),
@@ -113,7 +124,7 @@ class DFDataModule(L.LightningDataModule):
 
     @override
     def val_dataloader(self):
-        dataset = self.celeb_val
+        dataset: Dataset = self.celeb_val
         if self.config.use_gta_v:
             dataset = ConcatDataset([dataset, self.gta_val])
         return DataLoader(
@@ -123,7 +134,7 @@ class DFDataModule(L.LightningDataModule):
 
     @override
     def test_dataloader(self):
-        dataset = self.celeb_test
+        dataset: Dataset= self.celeb_test
         if self.config.use_gta_v:
             dataset = ConcatDataset([dataset, self.gta_test])
         return DataLoader(
