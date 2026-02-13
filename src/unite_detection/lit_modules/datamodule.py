@@ -134,7 +134,7 @@ class DFDataModule(L.LightningDataModule):
 
     @override
     def test_dataloader(self):
-        dataset: Dataset= self.celeb_test
+        dataset: Dataset = self.celeb_test
         if self.config.use_gta_v:
             dataset = ConcatDataset([dataset, self.gta_test])
         return DataLoader(
