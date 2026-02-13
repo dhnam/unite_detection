@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import kagglehub
 import lightning.pytorch as L
 import torch
@@ -16,7 +18,9 @@ from unite_detection.schemas import (
     SamplerConfig,
     UNITEClassifierConfig,
     UNITEConfig,
+    LossConfig,
 )
+from unite_detection.lit_modules import DFDataModule, LitUNITEClassifier
 
 print("Logging into kagglehub...")
 kagglehub.login()
@@ -107,7 +111,7 @@ def sweep_train():
 
         arch_schema = ArchSchema(
             num_frames=32 if config.setting == "long" else 16,
-            img_size=[384, 384] if config.setting == "big" else [224, 224],
+            img_size=(384, 384) if config.setting == "big" else (224, 224),
         )
 
         # 데이터 모듈 설정 (10,000개 샘플링 유지)
