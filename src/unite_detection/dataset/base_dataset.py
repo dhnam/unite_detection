@@ -76,7 +76,7 @@ class DeepFakeBaseDataset(Dataset, ABC):
         """자식 클래스에서 구현: 프레임 수에 따른 청크 개수 계산"""
         raise NotImplementedError
 
-    def get_label_counter(self) -> Counter:
+    def get_label_counter(self) -> Counter[int]:
         return Counter([x["label"] for x in self.samples])
 
     def __len__(self):

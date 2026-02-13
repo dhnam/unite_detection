@@ -97,6 +97,9 @@ class DataModuleConfig(BaseModel):
     run_sample: int = 20000
     loader: DataLoaderConfig = Field(default_factory=DataLoaderConfig)
     dataset: DatasetConfig = Field(default_factory=DatasetConfig)
+    real_sample_weight: float = 0.4
+    fake_sample_weight: float = 0.35
+    gta_sample_weight: float = 0.25
 
 
 class VisualizationData(BaseModel):
