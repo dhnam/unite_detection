@@ -23,8 +23,9 @@ dependencies = [
     "pydantic>=2.12.5",
     "scikit-learn>=1.8.0",
     "seaborn>=0.13.2",
+    "torch==2.9.0",
     "torchcodec==0.9.0",
-    "torchvision>=0.24.0",
+    "torchvision==0.24",
     "transformers>=5.1.0",
     "typer>=0.23.1",
     "types-seaborn>=0.13.2.20251221",
@@ -52,13 +53,13 @@ torchvision = [
 ]
 
 [[tool.uv.index]]
-name = "pytorch-cu126"
-url = "https://download.pytorch.org/whl/cu126"
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
 explicit = true
 
 [[tool.uv.index]]
-name = "pytorch-cpu"
-url = "https://download.pytorch.org/whl/cpu"
+name = "pytorch-cu126"
+url = "https://download.pytorch.org/whl/cu126"
 explicit = true
 
 [tool.ruff.lint]
