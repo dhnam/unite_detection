@@ -1,5 +1,6 @@
 #! /bin/bash
 pip install uv
+sudo apt update
 sudo apt install -y libgl1 ffmpeg
 
 if command -v nvidia-smi &> /dev/null; then
