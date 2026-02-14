@@ -32,12 +32,14 @@ dependencies = [
     "wandb>=0.24.2",
 ]
 
+[tool.uv]
+no-build-isolation-package = ["flash-attn"]
+
 [project.optional-dependencies]
 gpu = ["torch==2.9.0", "torchvision", "flash-attn"]
 
 [tool.uv.extra-build-dependencies]
 flash-attn = ["torch==2.9.0"]
-
 
 [tool.uv.sources]
 torch = [
