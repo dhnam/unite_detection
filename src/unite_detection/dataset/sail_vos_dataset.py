@@ -15,7 +15,7 @@ class SailVosDataset(DeepFakeBaseDataset):
     ):
         self.ext = ext
         self.config = config if config else DatasetConfig()
-        self.processor = ImageProcessor(self.idx_to_filename, self.config.arch.img_size)
+        self.processor = ImageProcessor(self.idx_to_filename, (self.config.arch.img_size, self.config.arch.img_size))
 
         super().__init__(paths, config)
 

@@ -49,7 +49,7 @@ transform = v2.Compose(
     ]
 )
 
-arch = ArchSchema(num_frames=LENGTH, img_size=(SIZE_SIDE, SIZE_SIDE))
+arch = ArchSchema(num_frames=LENGTH, img_size=SIZE_SIDE)
 
 encoder = EncoderConfig(
     model=ENCODER,

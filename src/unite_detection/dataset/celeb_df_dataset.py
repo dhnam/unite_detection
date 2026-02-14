@@ -98,7 +98,7 @@ class CelebDFVideoDataset(CelebDFBaseDataset):
             print(f"Error loading {video_path}: {e}")
             frames_tensor_out: Float[Tensor, "channel batch h w"]
             frames_tensor_out = torch.zeros(
-                (3, self.config.arch.num_frames, self.config.arch.img_size[1], self.config.arch.img_size[0]),
+                (3, self.config.arch.num_frames, self.config.arch.img_size, self.config.arch.img_size),
                 dtype=torch.float32,
             )
 
@@ -115,7 +115,7 @@ class CelebDFImageDataset(CelebDFBaseDataset):
     ):
         super().__init__(paths, config)
         self.processor = ImageProcessor(
-            CelebDFImageDataset.idx_to_filename, self.config.arch.img_size
+            CelebDFImageDataset.idx_to_filename, (self.config.arch.img_size, self.config.arch.img_size)
         )
 
     @staticmethod

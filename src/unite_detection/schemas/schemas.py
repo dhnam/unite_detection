@@ -22,7 +22,7 @@ class ArchSchema(BaseModel):
     num_cls: int = 2
     num_heads: int = 12
     num_frames: int = 32
-    img_size: tuple[int, int] = (384, 384)
+    img_size: int = 384
 
 
 class UNITEConfig(BaseModel):
