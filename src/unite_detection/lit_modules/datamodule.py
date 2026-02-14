@@ -49,9 +49,7 @@ class DFDataModule(L.LightningDataModule):
     def __init__(self, config: DataModuleConfig | None = None):
         super().__init__()
         self.config = config or DataModuleConfig()
-        self.save_hyperparameters(
-            self.config.model_dump(exclude={"dataset": {"transform"}})
-        )
+        self.save_hyperparameters(self.config.model_dump())
         self.celeb_manager = CelebDFManager(self.config)
         self.gta_manager = GTAManager(self.config)
         self.sampler_factory = SamplerFactory(self.config.sampler)

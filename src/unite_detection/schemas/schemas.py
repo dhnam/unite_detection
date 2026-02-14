@@ -28,8 +28,8 @@ class ArchSchema(BaseModel):
 class UNITEConfig(BaseModel):
     dropout: float = 0.1
     use_bfloat: bool = True
-    arch: ArchSchema = Field(default_factory=ArchSchema)
-    encoder: EncoderConfig = Field(default_factory=EncoderConfig)
+    arch: ArchSchema = Field(default_factory=ArchSchema, exclude=True)
+    encoder: EncoderConfig = Field(default_factory=EncoderConfig, exclude=True)
 
 
 class UNITEOutput(NamedTuple):
@@ -42,7 +42,7 @@ class ADLossConfig(BaseModel):
     delta_within: tuple[float, float] = (0.01, -2.0)
     delta_between: float = 0.5
     eta: float = 0.05
-    arch: ArchSchema = Field(default_factory=ArchSchema)
+    arch: ArchSchema = Field(default_factory=ArchSchema, exclude=True)
 
 
 class OptimizerConfig(BaseModel):
@@ -69,7 +69,7 @@ class UNITEClassifierConfig(BaseModel):
 
 class DatasetConfig(BaseModel):
     video_decode_device: str = "cpu"
-    transform: Callable | None = None
+    transform: Callable | None = Field(None, exclude=True)
     arch: ArchSchema = Field(default_factory=ArchSchema)
     encoder: EncoderConfig = Field(default_factory=EncoderConfig)
 

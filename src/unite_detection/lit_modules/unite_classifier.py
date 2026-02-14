@@ -25,14 +25,7 @@ class LitUNITEClassifier(L.LightningModule):
     def __init__(self, config: UNITEClassifierConfig | None = None):
         super().__init__()
         self.config = config or UNITEClassifierConfig()
-        self.save_hyperparameters(
-            self.config.model_dump(
-                exclude={
-                    "unite_model": {"arch"},
-                    "ad_loss": {"arch"},
-                }
-            )
-        )
+        self.save_hyperparameters(self.config.model_dump())
 
         self.model: UNITE = UNITE(self.config.unite_model)
         self.ce_loss: nn.Module = nn.CrossEntropyLoss()
