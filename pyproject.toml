@@ -25,7 +25,7 @@ dependencies = [
     "seaborn>=0.13.2",
     "torch==2.9.0",
     "torchcodec==0.9.0",
-    "torchvision==0.24",
+    "torchvision==0.24.0",
     "transformers>=5.1.0",
     "typer>=0.23.1",
     "types-seaborn>=0.13.2.20251221",
@@ -37,18 +37,18 @@ dependencies = [
 no-build-isolation-package = ["flash-attn"]
 
 [project.optional-dependencies]
-gpu = ["torch==2.9.0", "torchvision", "flash-attn"]
+gpu = ["flash-attn"]
 
 [tool.uv.extra-build-dependencies]
 flash-attn = ["torch==2.9.0"]
 
 [tool.uv.sources]
 torch = [
-  { index = "pytorch-cu126", extra = "gpu" },
+  { index = "pytorch-cu128", marker = "extra=='gpu'" },
   { index = "pytorch-cpu", marker = "extra!='gpu'" }
 ]
 torchvision = [
-  { index = "pytorch-cu126", extra = "gpu" },
+  { index = "pytorch-cu128", marker = "extra=='gpu'" },
   { index = "pytorch-cpu", marker = "extra!='gpu'" }
 ]
 
@@ -58,8 +58,8 @@ url = "https://download.pytorch.org/whl/cpu"
 explicit = true
 
 [[tool.uv.index]]
-name = "pytorch-cu126"
-url = "https://download.pytorch.org/whl/cu126"
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
 explicit = true
 
 [tool.ruff.lint]
