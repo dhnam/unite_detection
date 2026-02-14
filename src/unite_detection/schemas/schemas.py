@@ -137,6 +137,18 @@ class VisualizationData(BaseModel):
         )
 
 
+class AugmentationConfig(BaseModel):
+    horizontal_flip: bool = True
+    rotation: bool = False
+    rotation_range: int = 10
+    gaussian_blur: bool = True
+    gaussian_kernel: tuple[int, int] = (3, 7)
+    color_jitter: bool = False
+    color_jitter_brightness: float = 0.2
+    color_jitter_contrast: float = 0.2
+    jpeg: bool = True
+    jpeg_quality_range: tuple[int, int] = (60, 100)
+
 @runtime_checkable
 class Visualizable(Protocol):
     num_cls: int

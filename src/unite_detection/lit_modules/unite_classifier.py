@@ -220,4 +220,5 @@ class LitUNITEClassifier(L.LightningModule):
         }
 
 
-_: Visualizable = LitUNITEClassifier()
+if __name__ == "__main__":
+    _: Visualizable = LitUNITEClassifier()

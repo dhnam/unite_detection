@@ -12,6 +12,7 @@ from unite_detection.schemas.schemas import (
     UNITEClassifierConfig,
     UNITEConfig,
     UNITEOutput,
+    AugmentationConfig,
     Visualizable,
     VisualizationData,
 )
@@ -30,6 +31,7 @@ __all__ = [
     "UNITEClassifierConfig",
     "UNITEConfig",
     "UNITEOutput",
+    "AugmentationConfig",
     "Visualizable",
     "VisualizationData",
 ]
