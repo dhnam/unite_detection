@@ -34,8 +34,8 @@ dependencies = [
 gpu = ["torch", "torchvision", "flash-attn"]
 cpu = ["torch", "torchvision"]
 
-[tool.uv.extra-build-dependencies]
-flash-attn = ["torch"]
+[tool.uv]
+no-build-isolation-package = ["flash-attn"]
 
 [tool.uv.sources]
 torch = [
