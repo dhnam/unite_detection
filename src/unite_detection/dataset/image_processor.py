@@ -9,7 +9,7 @@ from torchvision.io import ImageReadMode, decode_image, read_file
 from torchvision.transforms import v2
 from transformers import BatchFeature
 
-from unite_detection.dataset import DeepFakeBaseDataset
+from unite_detection.dataset.base_dataset import DeepFakeBaseDataset
 
 
 class ImageProcessor:

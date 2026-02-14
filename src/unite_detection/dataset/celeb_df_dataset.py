@@ -10,7 +10,8 @@ from torch import Tensor
 from torchcodec.decoders import VideoDecoder
 from transformers import BatchFeature
 
-from unite_detection.dataset import DeepFakeBaseDataset, ImageProcessor
+from unite_detection.dataset.base_dataset import DeepFakeBaseDataset
+from unite_detection.dataset.image_processor import ImageProcessor
 from unite_detection.schemas import DatasetConfig
 
 

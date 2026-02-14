@@ -5,7 +5,8 @@ from jaxtyping import Float, Int
 from torch import Tensor, nn
 from transformers import AutoModel, AutoProcessor
 
-from unite_detection.models import TemporalPositionalEncoding, ViTEncoder
+from unite_detection.models.positional_encoding import TemporalPositionalEncoding
+from unite_detection.models.vit_encoder import ViTEncoder
 from unite_detection.schemas import UNITEConfig, UNITEOutput
 from unite_detection.utils import GPUSigLIPProcessor
 

@@ -1,7 +1,8 @@
 from pathlib import Path
 from typing import Sequence
 
-from unite_detection.dataset import DeepFakeBaseDataset, ImageProcessor
+from unite_detection.dataset.base_dataset import DeepFakeBaseDataset
+from unite_detection.dataset.image_processor import ImageProcessor
 from unite_detection.schemas import DatasetConfig
 
 
