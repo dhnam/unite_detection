@@ -35,17 +35,22 @@ dependencies = [
 no-build-isolation-package = ["flash-attn"]
 conflicts = [
   [
-    { extra = "gpu" },
     { extra = "cpu" },
+    { extra = "gpu" },
   ]
 ]
 
 [project.optional-dependencies]
-gpu = ["torch==2.9.0", "torchvision==0.24.0", "flash-attn"]
-cpu = ["torch==2.9.0", "torchvision==0.24.0"]
+gpu = ["torch~=2.9.0", "torchvision~=0.24", "flash-attn"]
+cpu = [
+    "torch==2.9.1+cpu ; sys_platform != 'darwin' and (platform_machine == 'x86_64' or platform_machine == 'AMD64')",
+    "torchvision==0.24.1+cpu ; sys_platform != 'darwin' and (platform_machine == 'x86_64' or platform_machine == 'AMD64')",
+    "torch==2.9.1 ; sys_platform == 'darwin' or platform_machine == 'aarch64'",
+    "torchvision==0.24.1 ; sys_platform == 'darwin' or platform_machine == 'aarch64'",
+]
 
 [tool.uv.extra-build-dependencies]
-flash-attn = ["torch==2.9.0"]
+flash-attn = ["torch~=2.9.0"]
 
 [tool.uv.sources]
 torch = [
@@ -57,8 +62,8 @@ torchvision = [
   { index = "pytorch-cpu", extra = "cpu" }
 ]
 
-[dependency-groups] # There's buggy behaviour here - hope it gets well some day
-dev = ["unite-detection[cpu]"]
+# [dependency-groups] # There's buggy behaviour here - hope it gets well some day
+# dev = ["unite-detection[cpu]"]
 
 [[tool.uv.index]]
 name = "pytorch-cpu"
