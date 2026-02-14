@@ -11,9 +11,7 @@ arch:
   num_cls: 2
   num_heads: 12
   num_frames: 32
-  img_size:
-  - 384
-  - 384
+  img_size: 384
 encoder:
   model: google/siglip2-base-patch16-384
   use_auto_processor: true
