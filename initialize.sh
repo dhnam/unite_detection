@@ -1,6 +1,6 @@
 #! /bin/bash
 pip install uv
-sudo apt install -y libgl1
+sudo apt install -y libgl1 ffmpeg
 
 if command -v nvidia-smi &> /dev/null; then
     echo "GPU detected. Installing Torch with CUDA 12.6..."
