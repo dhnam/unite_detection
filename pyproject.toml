@@ -30,18 +30,12 @@ dependencies = [
     "wandb>=0.24.2",
 ]
 
-[tool.uv]
-no-build-isolation-package = ["flash-attn"]
-
 [project.optional-dependencies]
 gpu = ["torch==2.9.0", "torchvision", "flash-attn"]
 cpu = ["torch==2.9.0", "torchvision"]
 
 [tool.uv.extra-build-dependencies]
 flash-attn = ["torch==2.9.0"]
-
-[tool.uv.extra-build-variables]
-flash-attn = { UV_EXTRA_INDEX_URL= " https://download.pytorch.org/whl/cu126" }
 
 
 [tool.uv.sources]
