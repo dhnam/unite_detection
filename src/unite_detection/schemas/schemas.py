@@ -16,13 +16,13 @@ class EncoderConfig(BaseModel):
 
 class ArchSchema(BaseModel):
     """
-        Architecture Schema
+    Architecture Schema
     """
+
     num_cls: int = 2
     num_heads: int = 12
     num_frames: int = 32
     img_size: tuple[int, int] = (384, 384)
-    
 
 
 class UNITEConfig(BaseModel):
@@ -82,12 +82,20 @@ class DataLoaderConfig(BaseModel):
     persistent_workers: bool = True
 
 
+class SamplerConfig(BaseModel):
+    real_weight: float = 0.4
+    fake_weight: float = 0.35
+    gta_weight: float = 0.25
+    seed: int | None = None
+    run_sample: int = 20000
+
+
 class DataModuleConfig(BaseModel):
-    celeb_df_preprocess_path: Path = Path("/content/preprocessed")
+    celeb_df_preprocess_path: Path = Path("./celeb_preprocessed")
     from_img: bool = True
     val_split_ratio: float = 0.1
     use_gta_v: bool = True
-    gta_v_preprocess_path: Path = Path("/content/gta_v_preprocessed")
+    gta_v_preprocess_path: Path = Path("./gta_v_preprocessed")
     gta_v_zip_path: Path = Path("./mini-ref-sailvos.zip")
     gta_v_down_path: Path = Path("./gta_v")
     gta_v_gdrive_id: str = "1-0Vu4X-pqb4Da226g1OALHytAlMRCC84"
@@ -95,14 +103,6 @@ class DataModuleConfig(BaseModel):
     loader: DataLoaderConfig = Field(default_factory=DataLoaderConfig)
     dataset: DatasetConfig = Field(default_factory=DatasetConfig)
     sampler: SamplerConfig = Field(default_factory=SamplerConfig)
-
-
-class SamplerConfig(BaseModel):
-    real_weight: float = 0.4
-    fake_weight: float = 0.35
-    gta_weight: float = 0.25
-    seed: int | None = None
-    run_sample: int = 20000
 
 
 class VisualizationData(BaseModel):
@@ -114,7 +114,7 @@ class VisualizationData(BaseModel):
     ps: Tensor | None = None
     cs: Tensor | None = None
 
-    @computed_field  # type: ignore
+    @computed_field
     @property
     def preds(self) -> Tensor:
         return torch.argmax(self.logits, dim=1)
