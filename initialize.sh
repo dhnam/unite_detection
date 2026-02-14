@@ -8,5 +8,5 @@ if command -v nvidia-smi &> /dev/null; then
     uv sync --extra gpu
 else
     echo "No GPU detected. Installing Torch CPU version..."
-    uv sync
+    uv sync --extra cpu
 fi

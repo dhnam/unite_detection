@@ -23,9 +23,7 @@ dependencies = [
     "pydantic>=2.12.5",
     "scikit-learn>=1.8.0",
     "seaborn>=0.13.2",
-    "torch==2.9.0",
     "torchcodec==0.9.0",
-    "torchvision==0.24.0",
     "transformers>=5.1.0",
     "typer>=0.23.1",
     "types-seaborn>=0.13.2.20251221",
@@ -35,22 +33,32 @@ dependencies = [
 
 [tool.uv]
 no-build-isolation-package = ["flash-attn"]
+conflicts = [
+  [
+    { extra = "gpu" },
+    { extra = "cpu" },
+  ]
+]
 
 [project.optional-dependencies]
-gpu = ["flash-attn"]
+gpu = ["torch==2.9.0", "torchvision==0.24.0", "flash-attn"]
+cpu = ["torch==2.9.0", "torchvision==0.24.0"]
 
 [tool.uv.extra-build-dependencies]
 flash-attn = ["torch==2.9.0"]
 
 [tool.uv.sources]
 torch = [
-  { index = "pytorch-cu128", marker = "extra=='gpu'" },
-  { index = "pytorch-cpu", marker = "extra!='gpu'" }
+  { index = "pytorch-cu128", extra = "gpu" },
+  { index = "pytorch-cpu", extra = "cpu" }
 ]
 torchvision = [
-  { index = "pytorch-cu128", marker = "extra=='gpu'" },
-  { index = "pytorch-cpu", marker = "extra!='gpu'" }
+  { index = "pytorch-cu128", extra = "gpu" },
+  { index = "pytorch-cpu", extra = "cpu" }
 ]
+
+[dependency-groups] # There's buggy behaviour here - hope it gets well some day
+dev = ["unite-detection[cpu]"]
 
 [[tool.uv.index]]
 name = "pytorch-cpu"
