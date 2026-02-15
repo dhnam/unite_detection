@@ -82,7 +82,7 @@ def train(
     config_path: Path = Path("./example.yaml"),
     resume: bool = False,
     run_name: str | None = None,
-    fast_dev_run: Annotated[bool, typer.Option("--fast-dev_run")] = False,
+    fast_dev_run: Annotated[bool, typer.Option("--fast-dev-run")] = False,
 ):
 
     print("Logging into wandb and kaggle...")
