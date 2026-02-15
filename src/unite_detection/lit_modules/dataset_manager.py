@@ -101,7 +101,7 @@ class CelebDFManager(AbstractDatasetManager):
 
         train_val_candidates = [x for x in all_paths if x not in test_path_set]
         train, val = cast(
-            tuple[list[Path], list[Path]],
+            "tuple[list[Path], list[Path]]",
             train_test_split(
                 train_val_candidates,
                 test_size=self.config.val_split_ratio,
@@ -143,7 +143,10 @@ class GTAManager(AbstractDatasetManager):
                 preprocess_gta_v(
                     self.config.gta_v_down_path,
                     self.config.gta_v_preprocess_path,
-                    self.config.dataset.size,
+                    (
+                        self.config.dataset.arch.img_size,
+                        self.config.dataset.arch.img_size,
+                    ),
                 )
             self.root = self.config.gta_v_preprocess_path
         else:
@@ -157,7 +160,7 @@ class GTAManager(AbstractDatasetManager):
 
         # 8:1:1 split
         train_vid, val_test_vid = cast(
-            tuple[list[Path], list[Path]],
+            "tuple[list[Path], list[Path]]",
             train_test_split(
                 all_folders_gta,
                 test_size=0.2,
@@ -167,7 +170,7 @@ class GTAManager(AbstractDatasetManager):
         )
 
         val_vid, test_vid = cast(
-            tuple[list[Path], list[Path]],
+            "tuple[list[Path], list[Path]]",
             train_test_split(
                 val_test_vid,
                 test_size=0.5,

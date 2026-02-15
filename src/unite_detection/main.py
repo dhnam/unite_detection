@@ -129,14 +129,14 @@ def train(config_path: Path = Path("./example.yaml"), resume: bool = False):
     if not resume:
         wandb_logger = WandbLogger(
             project=config.project_name,
-            name=name,
+            name=run_name,
             log_model=config.wandb_log_model,
         )
     else:
         id: str = typer.prompt("Input run ID to resume")
         wandb_logger = WandbLogger(
             project=config.project_name,
-            name=name,
+            name=run_name,
             log_model=config.wandb_log_model,
             id=id,
             resume="must",

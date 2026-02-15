@@ -1,6 +1,7 @@
 from unite_detection.schemas.schemas import (
-    ArchSchema,
     ADLossConfig,
+    ArchSchema,
+    AugmentationConfig,
     DataLoaderConfig,
     DataModuleConfig,
     DatasetConfig,
@@ -12,7 +13,6 @@ from unite_detection.schemas.schemas import (
     UNITEClassifierConfig,
     UNITEConfig,
     UNITEOutput,
-    AugmentationConfig,
     Visualizable,
     VisualizationData,
 )

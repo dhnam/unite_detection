@@ -75,7 +75,7 @@ class UNITE(nn.Module):
             else:
                 pixels: Float[Tensor, "bf channel h w"] = self.processor(x)
             encoded = cast(
-                Float[Tensor, "bf token embed"],
+                'Float[Tensor, "bf token embed"]',
                 self.vis_encoder.vision_model(pixel_values=pixels).last_hidden_state,
             )
         encoded_reshape: Float[Tensor, "batch frame token embed"] = encoded.reshape(
@@ -104,10 +104,7 @@ class UNITE(nn.Module):
 
         if return_ad_param:
             transformer_out, attn_output = cast(
-                tuple[
-                    Float[Tensor, "batch tot_w_cls embed"],
-                    Float[Tensor, "batch tot_w_cls head head_dim"],
-                ],
+                'tuple[Float[Tensor, "batch tot_w_cls embed"], Float[Tensor, "batch tot_w_cls head head_dim"]]',
                 self.first_encoder(transform_in, return_attn_output=True),
             )  # head_dim = embed // head
 

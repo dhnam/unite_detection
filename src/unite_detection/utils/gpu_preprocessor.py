@@ -9,7 +9,7 @@ from transformers import Siglip2ImageProcessor, Siglip2Processor
 
 class GPUSigLIPProcessor:
     def __init__(self, processor: Siglip2Processor):
-        config = cast(Siglip2ImageProcessor, processor.image_processor)  # type: ignore
+        config = cast("Siglip2ImageProcessor", processor.image_processor)  # type: ignore
 
         # 1. 리사이즈 설정: Bilinear + Antialias=True가 핵심
         # Fast 프로세서가 텐서를 처리할 때 사용하는 로직과 일치시킵니다.

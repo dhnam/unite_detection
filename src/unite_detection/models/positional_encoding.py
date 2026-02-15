@@ -68,4 +68,4 @@ class TemporalPositionalEncoding(nn.Module):
         # 같은 프레임(F)에 있는 모든 토큰(T)들에게 동일한 PE 벡터가 더해짐.
         x = x + self.pe[:, :current_frames, :, :]
 
-        return cast(Float[Tensor, "batch froame token embed"], self.dropout(x))
+        return cast('Float[Tensor, "batch froame token embed"]', self.dropout(x))

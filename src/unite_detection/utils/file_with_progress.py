@@ -5,7 +5,7 @@ from pathlib import Path
 from tqdm.auto import tqdm
 
 
-def copy_with_progress(src: str|Path, dst:str|Path):
+def copy_with_progress(src: str | Path, dst: str | Path):
     # 파일 크기 확인
     file_size = os.path.getsize(src)
 
@@ -25,7 +25,7 @@ def copy_with_progress(src: str|Path, dst:str|Path):
                     pbar.update(len(chunk))  # 프로그래스바 업데이트
 
 
-def unzip_by_size(zip_path: str|Path, extract_to: str|Path):
+def unzip_by_size(zip_path: str | Path, extract_to: str | Path):
     with zipfile.ZipFile(zip_path, "r") as zip_ref:
         # 전체 파일의 압축 해제 후 총 용량 계산
         total_size = sum(file.file_size for file in zip_ref.infolist())

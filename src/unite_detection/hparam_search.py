@@ -7,6 +7,7 @@ import wandb
 from lightning.pytorch.loggers import WandbLogger
 from torchvision.transforms import v2
 
+from unite_detection.lit_modules import DFDataModule, LitUNITEClassifier
 from unite_detection.schemas import (
     ADLossConfig,
     ArchSchema,
@@ -14,13 +15,12 @@ from unite_detection.schemas import (
     DataModuleConfig,
     DatasetConfig,
     EncoderConfig,
+    LossConfig,
     OptimizerConfig,
     SamplerConfig,
     UNITEClassifierConfig,
     UNITEConfig,
-    LossConfig,
 )
-from unite_detection.lit_modules import DFDataModule, LitUNITEClassifier
 
 print("Logging into kagglehub...")
 kagglehub.login()

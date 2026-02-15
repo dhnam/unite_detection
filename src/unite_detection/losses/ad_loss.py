@@ -20,7 +20,9 @@ class ADLoss(nn.Module):
         # C = torch.zeros(num_cls, num_heads, max_len)
         # Try changing C to random normalization so that it might not collapse due to initial condition.
         c: Float[Tensor, "cls head frame"]
-        c = torch.randn(config.arch.num_cls, config.arch.num_heads, config.arch.num_frames)
+        c = torch.randn(
+            config.arch.num_cls, config.arch.num_heads, config.arch.num_frames
+        )
         c = F.normalize(c, p=2, dim=2)
         self.register_buffer("C", c)
 
@@ -92,7 +94,9 @@ class ADLoss(nn.Module):
 
                     mask_triu: Bool[Tensor, "head head"] = torch.triu(
                         torch.ones(
-                            self.config.arch.num_heads, self.config.arch.num_heads, device=device
+                            self.config.arch.num_heads,
+                            self.config.arch.num_heads,
+                            device=device,
                         ),
                         diagonal=1,
                     ).bool()
@@ -119,7 +123,7 @@ class ADLoss(nn.Module):
         diff_within: Float[Tensor, "batch head frame"] = P_norm - C_norm[labels]
         # L2 Norm 계산 (헤드와 프레임 차원에 대해)
         dist_within = cast(
-            Float[Tensor, "batch"],
+            'Float[Tensor, "batch"]',
             torch.linalg.vector_norm(diff_within, ord=2, dim=(1, 2)),  # pyright: ignore[reportUnknownMemberType]
         )
         # 각 샘플별 delta 적용
@@ -136,7 +140,9 @@ class ADLoss(nn.Module):
                     dist_within[mask_cls] - self.delta_within[c]
                 ).mean()
                 loss_sum += class_loss
-        loss_within = loss_sum / self.config.arch.num_cls  # 클래스당 기여도를 1/N로 고정
+        loss_within = (
+            loss_sum / self.config.arch.num_cls
+        )  # 클래스당 기여도를 1/N로 고정
 
         if log_detail:
             return loss_within + loss_between, loss_within, loss_between, head_dist_mean

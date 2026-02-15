@@ -70,9 +70,9 @@ class ViTEncoder(nn.Module):
         batch_size, frame_token, embed_size = x.shape
 
         # Project queries, keys, values
-        q = cast(Float[Tensor, "b l s"], self.q_proj(x))
-        k = cast(Float[Tensor, "b l s"], self.k_proj(x))
-        v = cast(Float[Tensor, "b l s"], self.v_proj(x))
+        q = cast('Float[Tensor, "b l s"]', self.q_proj(x))
+        k = cast('Float[Tensor, "b l s"]', self.k_proj(x))
+        v = cast('Float[Tensor, "b l s"]', self.v_proj(x))
 
         # Split into multiple heads
         # (batch, token/frame * frames, num_heads, head_dim)
@@ -91,7 +91,7 @@ class ViTEncoder(nn.Module):
         if HAS_FLASH_ATTN and q.is_cuda:
             assert flash_attn_func is not None
             attn_output_raw = cast(
-                Float[Tensor, "b l h d"],
+                'Float[Tensor, "b l h d"]',
                 flash_attn_func(
                     q_in,
                     k_in,
@@ -126,12 +126,12 @@ class ViTEncoder(nn.Module):
         attn_output: Float[Tensor, "b l s"] = attn_output_raw.contiguous().view(
             batch_size, frame_token, embed_size
         )
-        attn_output_proj = cast(Float[Tensor, "b l s"], self.out_proj(attn_output))
+        attn_output_proj = cast('Float[Tensor, "b l s"]', self.out_proj(attn_output))
 
         x_ln1 = cast(
-            Float[Tensor, "b l s"], self.ln1(x + attn_output_proj)
+            'Float[Tensor, "b l s"]', self.ln1(x + attn_output_proj)
         )  # Residual connection + LayerNorm
-        x_ln2 = cast(Float[Tensor, "b l s"], self.ln2(x_ln1 + self.mlp(x_ln1)))
+        x_ln2 = cast('Float[Tensor, "b l s"]', self.ln2(x_ln1 + self.mlp(x_ln1)))
 
         if return_attn_output:
             return x_ln2, attn_output_raw

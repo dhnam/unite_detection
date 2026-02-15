@@ -75,7 +75,13 @@ name = "pytorch-cu128"
 url = "https://download.pytorch.org/whl/cu128"
 explicit = true
 
+[tool.ruff.lint.flake8-type-checking]
+runtime-evaluated-base-classes = ["pydantic.BaseModel"]
+
 [tool.ruff.lint]
+select = [
+  "F", "E", "I", "TCH",
+]
 ignore = ["F722", "F821"]
 
 [build-system]

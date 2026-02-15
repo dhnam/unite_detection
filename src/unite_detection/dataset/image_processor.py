@@ -1,15 +1,17 @@
 import math
 import os
-from typing import Callable, cast
+from typing import TYPE_CHECKING, Callable, cast
 
 import torch
 from jaxtyping import Float, Int
 from torch import Tensor
 from torchvision.io import ImageReadMode, decode_image, read_file
 from torchvision.transforms import v2
-from transformers import BatchFeature
 
 from unite_detection.dataset.base_dataset import DeepFakeBaseDataset
+
+if TYPE_CHECKING:
+    from transformers import BatchFeature
 
 
 class ImageProcessor:
@@ -73,11 +75,11 @@ class ImageProcessor:
             if dataset.config.encoder.use_auto_processor:
                 assert dataset.preprocessor is not None
                 processed = cast(
-                    BatchFeature,
+                    "BatchFeature",
                     dataset.preprocessor(images=frames_tensor, return_tensors="pt"),
                 )
                 frames_tensor = cast(
-                    Float[Tensor, "batch channel h w"], processed.pixel_values
+                    'Float[Tensor, "batch channel h w"]', processed.pixel_values
                 )
             frames_tensor_out: Float[Tensor, "channel batch h w"] = (
                 frames_tensor.permute(1, 0, 2, 3)

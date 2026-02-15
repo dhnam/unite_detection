@@ -1,6 +1,5 @@
 from typing import Literal, NotRequired, TypedDict, cast, override
 
-
 import lightning.pytorch as L
 import torch
 import torch.nn.functional as F
@@ -14,11 +13,15 @@ from torchmetrics.classification import (
     Precision,
     Recall,
 )
-from unite_detection.schemas import VisualizationData, Visualizable
 
 from unite_detection.losses import ADLoss
 from unite_detection.models import UNITE
-from unite_detection.schemas import UNITEClassifierConfig, UNITEOutput
+from unite_detection.schemas import (
+    UNITEClassifierConfig,
+    UNITEOutput,
+    Visualizable,
+    VisualizationData,
+)
 
 
 class LitUNITEClassifier(L.LightningModule):
@@ -62,9 +65,9 @@ class LitUNITEClassifier(L.LightningModule):
         )
         self.val_output: VisualizationData | None = None
         self.test_output: VisualizationData | None = None
-        self.num_heads:int = self.config.arch.num_heads
+        self.num_heads: int = self.config.arch.num_heads
         self.num_cls = self.config.arch.num_cls
-        
+
         self._val_buffer: list[VisualizationData] = []
         self._test_buffer: list[VisualizationData] = []
 
@@ -104,21 +107,16 @@ class LitUNITEClassifier(L.LightningModule):
         batch_idx: int,
     ) -> Float[Tensor, ""]:
         x, y = batch
-        logit, P, _ = cast(UNITEOutput, self.model(x, return_ad_param=True))
+        logit, P, _ = cast("UNITEOutput", self.model(x, return_ad_param=True))
         assert P is not None
         loss_ad, within, between, head_dist_mean = cast(
-            tuple[
-                Float[Tensor, ""],
-                Float[Tensor, ""],
-                Float[Tensor, ""],
-                Float[Tensor, ""],
-            ],
+            'tuple[Float[Tensor, ""], Float[Tensor, ""], Float[Tensor, ""], Float[Tensor, ""]]',
             self.ad_loss(P, y, log_detail=True),
         )
-        loss_ce = cast(Float[Tensor, ""], self.ce_loss(logit, y))
+        loss_ce = cast('Float[Tensor, ""]', self.ce_loss(logit, y))
         loss = loss_ce * self.config.loss.lambda_1 + loss_ad * self.config.loss.lambda_2
         c_magnitude = cast(
-            Float[Tensor, ""],
+            'Float[Tensor, ""]',
             torch.norm(self.ad_loss.C, p=2, dim=-1).mean(),  # pyright: ignore[reportUnknownMemberType]
         )
         self.log_dict(
@@ -148,11 +146,11 @@ class LitUNITEClassifier(L.LightningModule):
     ):
         x, y = batch
         logit, P, embed = cast(
-            UNITEOutput, self.model(x, return_ad_param=True, return_embed=True)
+            "UNITEOutput", self.model(x, return_ad_param=True, return_embed=True)
         )
         assert P is not None and embed is not None
-        loss_ad = cast(Float[Tensor, ""], self.ad_loss(P, y))
-        loss_ce = cast(Float[Tensor, ""], self.ce_loss(logit, y))
+        loss_ad = cast('Float[Tensor, ""]', self.ad_loss(P, y))
+        loss_ce = cast('Float[Tensor, ""]', self.ce_loss(logit, y))
         loss = loss_ce * self.config.loss.lambda_1 + loss_ad * self.config.loss.lambda_2
         self.log("val/loss_ad", loss_ad, logger=True)
         self.log("val/loss_ce", loss_ce, logger=True)
@@ -161,13 +159,15 @@ class LitUNITEClassifier(L.LightningModule):
         self.val_metrics.update(logit, y)
         self.log_dict(self.val_metrics, logger=True)
 
-        self._val_buffer.append(VisualizationData(
-            logits=logit.detach().cpu(),
-            labels=y.detach().cpu(),
-            embeds=embed.detach().cpu(),
-            ps=F.normalize(P, p=2, dim=2).detach().cpu(),
-            cs=self.ad_loss.C.detach().cpu(),
-        ))
+        self._val_buffer.append(
+            VisualizationData(
+                logits=logit.detach().cpu(),
+                labels=y.detach().cpu(),
+                embeds=embed.detach().cpu(),
+                ps=F.normalize(P, p=2, dim=2).detach().cpu(),
+                cs=self.ad_loss.C.detach().cpu(),
+            )
+        )
 
     @override
     def on_validation_epoch_end(self):
@@ -186,18 +186,19 @@ class LitUNITEClassifier(L.LightningModule):
         batch_idx: int,
     ):
         x, y = batch
-        logit, _, embed = cast(UNITEOutput, self.model(x, return_embed=True))
+        logit, _, embed = cast("UNITEOutput", self.model(x, return_embed=True))
         assert embed is not None
 
-        self._test_buffer.append(VisualizationData(
-            logits=logit.detach().cpu(),
-            labels=y.detach().cpu(),
-            embeds=embed.detach().cpu(),
-        ))
+        self._test_buffer.append(
+            VisualizationData(
+                logits=logit.detach().cpu(),
+                labels=y.detach().cpu(),
+                embeds=embed.detach().cpu(),
+            )
+        )
 
         self.test_metrics.update(logit, y)
         self.log_dict(self.test_metrics, logger=True)
-
 
     @override
     def on_test_epoch_end(self):

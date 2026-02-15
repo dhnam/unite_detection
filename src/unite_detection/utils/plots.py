@@ -41,7 +41,7 @@ def plot_conf_mat(data: VisualizationData, ctx: PlotContext):
     return fig
 
 
-def plot_tsne(data: VisualizationData, ctx: PlotContext, max_samples:int=20000):
+def plot_tsne(data: VisualizationData, ctx: PlotContext, max_samples: int = 20000):
     # 데이터가 너무 많으면 t-SNE 속도가 매우 느려지므로 샘플링
     num_samples = data.embeds.shape[0]
     embeds = data.embeds
@@ -70,7 +70,7 @@ def plot_tsne(data: VisualizationData, ctx: PlotContext, max_samples:int=20000):
         max_iter=1000,
         random_state=42,
     )
-    X_embedded = cast(np.ndarray, tsne.fit_transform(X))
+    X_embedded = cast("np.ndarray", tsne.fit_transform(X))
 
     # DataFrame 생성 (시각화 용이성 위해)
     df_tsne = pd.DataFrame(X_embedded, columns=["x", "y"])
@@ -103,7 +103,9 @@ def plot_tsne(data: VisualizationData, ctx: PlotContext, max_samples:int=20000):
     return fig
 
 
-def plot_encoder_tsne(data: VisualizationData, ctx: PlotContext, max_samples:int=400):
+def plot_encoder_tsne(
+    data: VisualizationData, ctx: PlotContext, max_samples: int = 400
+):
     # 데이터 준비
     tsne_embeds: list[np.ndarray] = []
     tsne_labels: list[str] = []  # Real/Fake 구분용
@@ -139,7 +141,7 @@ def plot_encoder_tsne(data: VisualizationData, ctx: PlotContext, max_samples:int
     # t-SNE 실행
     tsne_embeds_arr = np.array(tsne_embeds)
     tsne_2d = cast(
-        np.ndarray,
+        "np.ndarray",
         TSNE(n_components=2, random_state=42).fit_transform(tsne_embeds_arr),
     )
 

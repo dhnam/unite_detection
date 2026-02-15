@@ -185,7 +185,12 @@ def process_single_image(args):
         return f"Exception at {src_path}: {str(e)}"
 
 
-def preprocess_gta_v(source_dir: str | Path, output_dir: str | Path, target_size, num_workers=8):
+def preprocess_gta_v(
+    source_dir: str | Path,
+    output_dir: str | Path,
+    target_size: tuple[int, int],
+    num_workers=8,
+):
     """
     메인 처리 함수
     """

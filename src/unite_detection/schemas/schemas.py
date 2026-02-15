@@ -1,12 +1,21 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Callable, NamedTuple, Protocol, Sequence, runtime_checkable
+from typing import (
+    TYPE_CHECKING,
+    Callable,
+    NamedTuple,
+    Protocol,
+    Sequence,
+    runtime_checkable,
+)
 
 import torch
-from jaxtyping import Float
 from pydantic import BaseModel, ConfigDict, Field, computed_field
 from torch import Tensor
+
+if TYPE_CHECKING:
+    from jaxtyping import Float
 
 
 class EncoderConfig(BaseModel):
@@ -148,6 +157,7 @@ class AugmentationConfig(BaseModel):
     color_jitter_contrast: float = 0.2
     jpeg: bool = True
     jpeg_quality_range: tuple[int, int] = (60, 100)
+
 
 @runtime_checkable
 class Visualizable(Protocol):

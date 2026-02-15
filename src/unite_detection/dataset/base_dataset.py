@@ -32,9 +32,9 @@ class DeepFakeBaseDataset(Dataset, ABC):
         )
 
         self.preprocessor = None
-        if config.encoder.use_auto_processor:
+        if self.config.encoder.use_auto_processor:
             self.preprocessor = transformers.AutoProcessor.from_pretrained(
-                config.encoder.model, use_fast=True
+                self.config.encoder.model, use_fast=True
             )
 
     @abstractmethod

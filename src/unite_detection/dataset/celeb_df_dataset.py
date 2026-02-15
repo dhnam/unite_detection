@@ -1,18 +1,20 @@
 import math
 from abc import ABC
 from pathlib import Path
-from typing import Sequence, cast
+from typing import TYPE_CHECKING, Sequence, cast
 
 import cv2
 import torch
-from jaxtyping import Float, Int
-from torch import Tensor
 from torchcodec.decoders import VideoDecoder
-from transformers import BatchFeature
 
 from unite_detection.dataset.base_dataset import DeepFakeBaseDataset
 from unite_detection.dataset.image_processor import ImageProcessor
 from unite_detection.schemas import DatasetConfig
+
+if TYPE_CHECKING:
+    from jaxtyping import Float, Int
+    from torch import Tensor
+    from transformers import BatchFeature
 
 
 class CelebDFBaseDataset(DeepFakeBaseDataset, ABC):
@@ -70,7 +72,7 @@ class CelebDFVideoDataset(CelebDFBaseDataset):
             if self.config.transform:
                 # Video transform이 필요한 경우 여기서 처리 (Batch 단위 지원 필요)
                 pixel_value = cast(
-                    Float[Tensor, "batch channel h w"],
+                    'Float[Tensor, "batch channel h w"]',
                     self.config.transform(pixel_value_raw),
                 )
             else:
@@ -80,11 +82,11 @@ class CelebDFVideoDataset(CelebDFBaseDataset):
             if self.config.encoder.use_auto_processor:
                 assert self.preprocessor is not None
                 processed = cast(
-                    BatchFeature,
+                    "BatchFeature",
                     self.preprocessor(images=pixel_value, return_tensors="pt"),
                 )
                 frames_tensor = cast(
-                    Float[Tensor, "batch channel h w"], processed.pixel_values
+                    'Float[Tensor, "batch channel h w"]', processed.pixel_values
                 )
             else:
                 frames_tensor = pixel_value
@@ -98,7 +100,12 @@ class CelebDFVideoDataset(CelebDFBaseDataset):
             print(f"Error loading {video_path}: {e}")
             frames_tensor_out: Float[Tensor, "channel batch h w"]
             frames_tensor_out = torch.zeros(
-                (3, self.config.arch.num_frames, self.config.arch.img_size, self.config.arch.img_size),
+                (
+                    3,
+                    self.config.arch.num_frames,
+                    self.config.arch.img_size,
+                    self.config.arch.img_size,
+                ),
                 dtype=torch.float32,
             )
 
@@ -115,7 +122,8 @@ class CelebDFImageDataset(CelebDFBaseDataset):
     ):
         super().__init__(paths, config)
         self.processor = ImageProcessor(
-            CelebDFImageDataset.idx_to_filename, (self.config.arch.img_size, self.config.arch.img_size)
+            CelebDFImageDataset.idx_to_filename,
+            (self.config.arch.img_size, self.config.arch.img_size),
         )
 
     @staticmethod
