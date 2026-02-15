@@ -36,20 +36,25 @@ class UNITE(nn.Module):
         self.vis_encoder.eval()
 
         self.class_token: Float[Tensor, "embed"] = nn.Parameter(
-            torch.randn((self.embed_size,)), requires_grad=True
+            torch.randn((self.embed_size,)),
+            requires_grad=True,
         )
 
         self.pos_embedding = TemporalPositionalEncoding(
-            self.embed_size, config.arch.num_frames, config.dropout
+            self.embed_size,
+            config.arch.num_frames,
+            config.dropout,
         )
         self.first_encoder = ViTEncoder(
-            self.embed_size, config.arch.num_heads, config.dropout
+            self.embed_size,
+            config.arch.num_heads,
+            config.dropout,
         )
         self.encoders = nn.ModuleList(
             [
                 ViTEncoder(self.embed_size, config.arch.num_heads, config.dropout)
                 for _ in range(3)
-            ]
+            ],
         )
         self.mlp_head = nn.Linear(self.embed_size, config.arch.num_cls)
 
@@ -67,10 +72,14 @@ class UNITE(nn.Module):
         with torch.no_grad():
             if self.config.encoder.use_auto_processor:
                 pixels_int: Int[Tensor, "bf channel h w"] = x.permute(
-                    0, 2, 1, 3, 4
+                    0,
+                    2,
+                    1,
+                    3,
+                    4,
                 ).flatten(0, 1)
                 pixels: Float[Tensor, "bf channel h w"] = pixels_int.to(
-                    self.vis_encoder.dtype
+                    self.vis_encoder.dtype,
                 )
             else:
                 pixels: Float[Tensor, "bf channel h w"] = self.processor(x)
@@ -79,24 +88,32 @@ class UNITE(nn.Module):
                 self.vis_encoder.vision_model(pixel_values=pixels).last_hidden_state,
             )
         encoded_reshape: Float[Tensor, "batch frame token embed"] = encoded.reshape(
-            b, f, -1, self.embed_size
+            b,
+            f,
+            -1,
+            self.embed_size,
         )
         train_in: Float[Tensor, "batch frame token embed"] = self.pos_embedding(
-            encoded_reshape
+            encoded_reshape,
         )
 
         _, _, t, d = train_in.shape
         # Reshape for transformer
         # tot_token = frame * token
         train_reshape: Float[Tensor, "batch tot_token embed"] = train_in.reshape(
-            b, t * f, d
+            b,
+            t * f,
+            d,
         )
         cls_token: Float[Tensor, "batch 1 embed"] = self.class_token.view(
-            1, 1, -1
+            1,
+            1,
+            -1,
         ).expand(b, -1, -1)
         # tot_w_cls = tot_token + 1
         transform_in: Float[Tensor, "batch tot_w_cls embed"] = torch.cat(
-            [cls_token, train_reshape], dim=1
+            [cls_token, train_reshape],
+            dim=1,
         )
 
         P: Float[Tensor, "batch head frame"] | None = None
@@ -113,7 +130,10 @@ class UNITE(nn.Module):
 
             train_in_reshape: Float[Tensor, "batch tot_token head head_dim"]
             train_in_reshape = train_in.reshape(
-                b, -1, self.config.arch.num_heads, d // self.config.arch.num_heads
+                b,
+                -1,
+                self.config.arch.num_heads,
+                d // self.config.arch.num_heads,
             )
 
             train_in_permute: Float[Tensor, "batch head tot_token head_dim"]
@@ -132,7 +152,7 @@ class UNITE(nn.Module):
 
         for encoder in self.encoders:
             transformer_out: Float[Tensor, "batch tot_w_cls embed"] = encoder(
-                transformer_out
+                transformer_out,
             )
 
         # Get only cls_token

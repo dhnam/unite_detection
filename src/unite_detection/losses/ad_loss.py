@@ -21,13 +21,15 @@ class ADLoss(nn.Module):
         # Try changing C to random normalization so that it might not collapse due to initial condition.
         c: Float[Tensor, "cls head frame"]
         c = torch.randn(
-            config.arch.num_cls, config.arch.num_heads, config.arch.num_frames
+            config.arch.num_cls,
+            config.arch.num_heads,
+            config.arch.num_frames,
         )
         c = F.normalize(c, p=2, dim=2)
         self.register_buffer("C", c)
 
         delta_within: Float[Tensor, "cls"] = torch.tensor(
-            config.delta_within
+            config.delta_within,
         )  # [0.01, -2.0] (True, Fake)
         self.register_buffer("delta_within", delta_within)
 
@@ -46,7 +48,10 @@ class ADLoss(nn.Module):
         labels: Int[Tensor, "batch"],
         log_detail: Literal[True],
     ) -> tuple[
-        Float[Tensor, ""], Float[Tensor, ""], Float[Tensor, ""], Float[Tensor, ""]
+        Float[Tensor, ""],
+        Float[Tensor, ""],
+        Float[Tensor, ""],
+        Float[Tensor, ""],
     ]: ...
 
     @override
@@ -107,7 +112,7 @@ class ADLoss(nn.Module):
                     head_dist_mean += different_heads_dist.mean()
                     loss_between: Float[Tensor, ""]
                     loss_between += torch.relu(
-                        self.config.delta_between - different_heads_dist
+                        self.config.delta_between - different_heads_dist,
                     ).mean()
 
         if valid_cls > 0:
@@ -137,7 +142,7 @@ class ADLoss(nn.Module):
                 # 해당 클래스 샘플들만의 평균을 구함
                 class_loss = Float[Tensor, ""]
                 class_loss = torch.relu(
-                    dist_within[mask_cls] - self.delta_within[c]
+                    dist_within[mask_cls] - self.delta_within[c],
                 ).mean()
                 loss_sum += class_loss
         loss_within = (

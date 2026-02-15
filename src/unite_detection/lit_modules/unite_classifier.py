@@ -52,7 +52,7 @@ class LitUNITEClassifier(L.LightningModule):
                 Precision(**metric_param),
                 Recall(**metric_param),
                 AUROC(**metric_param),
-            ]
+            ],
         )
 
         self.val_metrics: MetricCollection = metrics.clone(prefix="val/")
@@ -82,7 +82,7 @@ class LitUNITEClassifier(L.LightningModule):
 
         # 저장하지 않을 키 필터링 (vis_encoder 관련 키들 제거)
         # 키 이름은 모델 구조에 따라 'model.vis_encoder.'로 시작합니다.
-        keys_to_remove = [k for k in state_dict.keys() if "model.vis_encoder" in k]  # pyright: ignore[reportAny]
+        keys_to_remove = [k for k in state_dict if "model.vis_encoder" in k]  # pyright: ignore[reportAny]
 
         for k in keys_to_remove:  # pyright: ignore[reportAny]
             del state_dict[k]
@@ -146,7 +146,8 @@ class LitUNITEClassifier(L.LightningModule):
     ):
         x, y = batch
         logit, P, embed = cast(
-            "UNITEOutput", self.model(x, return_ad_param=True, return_embed=True)
+            "UNITEOutput",
+            self.model(x, return_ad_param=True, return_embed=True),
         )
         assert P is not None and embed is not None
         loss_ad = cast('Float[Tensor, ""]', self.ad_loss(P, y))
@@ -166,7 +167,7 @@ class LitUNITEClassifier(L.LightningModule):
                 embeds=embed.detach().cpu(),
                 ps=F.normalize(P, p=2, dim=2).detach().cpu(),
                 cs=self.ad_loss.C.detach().cpu(),
-            )
+            ),
         )
 
     @override
@@ -194,7 +195,7 @@ class LitUNITEClassifier(L.LightningModule):
                 logits=logit.detach().cpu(),
                 labels=y.detach().cpu(),
                 embeds=embed.detach().cpu(),
-            )
+            ),
         )
 
         self.test_metrics.update(logit, y)
@@ -209,7 +210,9 @@ class LitUNITEClassifier(L.LightningModule):
     def configure_optimizers(self):
         optim = torch.optim.AdamW(self.model.parameters(), lr=self.config.optim.lr)
         scheduler = torch.optim.lr_scheduler.StepLR(
-            optim, self.config.optim.decay_steps, gamma=0.5
+            optim,
+            self.config.optim.decay_steps,
+            gamma=0.5,
         )
 
         return {

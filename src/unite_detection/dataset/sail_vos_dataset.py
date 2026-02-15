@@ -1,5 +1,5 @@
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Sequence
 
 from unite_detection.dataset.base_dataset import DeepFakeBaseDataset
 from unite_detection.dataset.image_processor import ImageProcessor
@@ -14,9 +14,10 @@ class SailVosDataset(DeepFakeBaseDataset):
         ext: str = ".png",
     ):
         self.ext = ext
-        self.config = config if config else DatasetConfig()
+        self.config = config or DatasetConfig()
         self.processor = ImageProcessor(
-            self.idx_to_filename, (self.config.arch.img_size, self.config.arch.img_size)
+            self.idx_to_filename,
+            (self.config.arch.img_size, self.config.arch.img_size),
         )
 
         super().__init__(paths, config)

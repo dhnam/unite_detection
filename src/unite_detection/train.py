@@ -46,7 +46,7 @@ transform = v2.Compose(
         # v2.RandomApply([v2.ColorJitter(brightness=0.2, contrast=0.2)]), # Looks slow...
         v2.RandomApply([v2.JPEG((60, 100))]),
         v2.ToDtype(torch.float32),
-    ]
+    ],
 )
 
 arch = ArchSchema(num_frames=LENGTH, img_size=SIZE_SIDE)

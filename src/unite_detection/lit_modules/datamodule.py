@@ -14,7 +14,9 @@ class SamplerFactory:
         self.config: SamplerConfig = config or SamplerConfig()
 
     def create_sampler(
-        self, celeb_train: CelebDFBaseDataset, gta_train: SailVosDataset | None = None
+        self,
+        celeb_train: CelebDFBaseDataset,
+        gta_train: SailVosDataset | None = None,
     ) -> WeightedRandomSampler:
         celeb_counts = celeb_train.get_label_counter()
         celeb_weights = (
@@ -80,29 +82,40 @@ class DFDataModule(L.LightningDataModule):
             self._setup_test_data(test_val_config)
 
     def _setup_fit_data(
-        self, train_config: DatasetConfig, val_config: DatasetConfig
+        self,
+        train_config: DatasetConfig,
+        val_config: DatasetConfig,
     ) -> None:
         self.celeb_train = self.celeb_manager.dataset_cls(
-            self.celeb_manager.train_paths, train_config
+            self.celeb_manager.train_paths,
+            train_config,
         )
         self.celeb_val = self.celeb_manager.dataset_cls(
-            self.celeb_manager.val_paths, val_config
+            self.celeb_manager.val_paths,
+            val_config,
         )
         if self.config.use_gta_v:
             self.gta_train = SailVosDataset(
-                self.gta_manager.train_paths, train_config, self.gta_manager.ext
+                self.gta_manager.train_paths,
+                train_config,
+                self.gta_manager.ext,
             )
             self.gta_val = SailVosDataset(
-                self.gta_manager.val_paths, val_config, self.gta_manager.ext
+                self.gta_manager.val_paths,
+                val_config,
+                self.gta_manager.ext,
             )
 
     def _setup_test_data(self, test_config: DatasetConfig) -> None:
         self.celeb_test = self.celeb_manager.dataset_cls(
-            self.celeb_manager.test_paths, test_config
+            self.celeb_manager.test_paths,
+            test_config,
         )
         if self.config.use_gta_v:
             self.gta_test = SailVosDataset(
-                self.gta_manager.test_paths, test_config, self.gta_manager.ext
+                self.gta_manager.test_paths,
+                test_config,
+                self.gta_manager.ext,
             )
 
     @override

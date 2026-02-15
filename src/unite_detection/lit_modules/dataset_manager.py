@@ -93,11 +93,11 @@ class CelebDFManager(AbstractDatasetManager):
         test_df = pd.read_csv(txt_path, sep=" ", header=None, names=["label", "path"])
         test_path_set: set[Path]
         if self.config.from_img:
-            test_path_set = set(
+            test_path_set = {
                 (self.root / Path(x).with_suffix("")) for x in test_df["path"]
-            )
+            }
         else:
-            test_path_set = set(self.root / x for x in test_df["path"])
+            test_path_set = {self.root / x for x in test_df["path"]}
 
         train_val_candidates = [x for x in all_paths if x not in test_path_set]
         train, val = cast(
@@ -130,7 +130,8 @@ class GTAManager(AbstractDatasetManager):
         if not self.config.gta_v_zip_path.exists():
             print("get Sailvos dataset from drive")
             gdown.download(
-                id=self.config.gta_v_gdrive_id, output=str(self.config.gta_v_zip_path)
+                id=self.config.gta_v_gdrive_id,
+                output=str(self.config.gta_v_zip_path),
             )
 
         if not self.config.gta_v_down_path.exists():

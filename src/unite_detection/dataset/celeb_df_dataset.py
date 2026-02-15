@@ -1,7 +1,8 @@
 import math
 from abc import ABC
+from collections.abc import Sequence
 from pathlib import Path
-from typing import TYPE_CHECKING, Sequence, cast
+from typing import TYPE_CHECKING, cast
 
 import cv2
 import torch
@@ -86,7 +87,8 @@ class CelebDFVideoDataset(CelebDFBaseDataset):
                     self.preprocessor(images=pixel_value, return_tensors="pt"),
                 )
                 frames_tensor = cast(
-                    'Float[Tensor, "batch channel h w"]', processed.pixel_values
+                    'Float[Tensor, "batch channel h w"]',
+                    processed.pixel_values,
                 )
             else:
                 frames_tensor = pixel_value
@@ -118,7 +120,9 @@ class CelebDFImageDataset(CelebDFBaseDataset):
     """
 
     def __init__(
-        self, paths: Sequence[Path | str], config: DatasetConfig | None = None
+        self,
+        paths: Sequence[Path | str],
+        config: DatasetConfig | None = None,
     ):
         super().__init__(paths, config)
         self.processor = ImageProcessor(

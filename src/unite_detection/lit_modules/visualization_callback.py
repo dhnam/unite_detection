@@ -15,7 +15,10 @@ from unite_detection.utils.plots import (
 
 class VisualizationCallback(L.Callback):
     def _visualize_all(
-        self, pl_module: L.LightningModule, data: VisualizationData, stage: str
+        self,
+        pl_module: L.LightningModule,
+        data: VisualizationData,
+        stage: str,
     ):
         assert isinstance(pl_module, Visualizable)
         ctx = PlotContext(

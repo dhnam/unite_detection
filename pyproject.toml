@@ -80,9 +80,9 @@ runtime-evaluated-base-classes = ["pydantic.BaseModel"]
 
 [tool.ruff.lint]
 select = [
-  "F", "E", "I", "TCH",
+  "F", "E", "I", "TCH", "UP"
 ]
-ignore = ["F722", "F821"]
+ignore = ["F722", "F821", "UP037"]
 
 [build-system]
 requires = ["uv_build>=0.10.1,<0.11.0"]

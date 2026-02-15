@@ -1,5 +1,6 @@
+from collections.abc import Callable
 from importlib.util import find_spec
-from typing import Callable, Literal, cast, overload, override
+from typing import Literal, cast, overload, override
 
 import torch.nn.functional as F
 from jaxtyping import Float
@@ -22,7 +23,10 @@ else:
 
 class ViTEncoder(nn.Module):
     def __init__(
-        self, embed_size: int = 768, num_heads: int = 12, dropout: float = 0.1
+        self,
+        embed_size: int = 768,
+        num_heads: int = 12,
+        dropout: float = 0.1,
     ):
         super().__init__()
         self.num_heads: int = num_heads
@@ -77,13 +81,22 @@ class ViTEncoder(nn.Module):
         # Split into multiple heads
         # (batch, token/frame * frames, num_heads, head_dim)
         q_in: Float[Tensor, "b l h d"] = q.view(
-            batch_size, frame_token, self.num_heads, self.head_dim
+            batch_size,
+            frame_token,
+            self.num_heads,
+            self.head_dim,
         )
         k_in: Float[Tensor, "b l h d"] = k.view(
-            batch_size, frame_token, self.num_heads, self.head_dim
+            batch_size,
+            frame_token,
+            self.num_heads,
+            self.head_dim,
         )
         v_in: Float[Tensor, "b l h d"] = v.view(
-            batch_size, frame_token, self.num_heads, self.head_dim
+            batch_size,
+            frame_token,
+            self.num_heads,
+            self.head_dim,
         )
 
         # Apply scaled dot product attention
@@ -117,19 +130,23 @@ class ViTEncoder(nn.Module):
                 )
             )
             attn_output_raw: Float[Tensor, "b l h d"] = attn_output_raw_t.transpose(
-                1, 2
+                1,
+                2,
             )
 
         # attn_output: (batch, token/frame * frames, num_heads, head_dim)
 
         # Concatenate heads and apply final linear projection
         attn_output: Float[Tensor, "b l s"] = attn_output_raw.contiguous().view(
-            batch_size, frame_token, embed_size
+            batch_size,
+            frame_token,
+            embed_size,
         )
         attn_output_proj = cast('Float[Tensor, "b l s"]', self.out_proj(attn_output))
 
         x_ln1 = cast(
-            'Float[Tensor, "b l s"]', self.ln1(x + attn_output_proj)
+            'Float[Tensor, "b l s"]',
+            self.ln1(x + attn_output_proj),
         )  # Residual connection + LayerNorm
         x_ln2 = cast('Float[Tensor, "b l s"]', self.ln2(x_ln1 + self.mlp(x_ln1)))
 

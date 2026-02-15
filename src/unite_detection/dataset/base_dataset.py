@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 from collections import Counter
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Sequence, TypedDict
+from typing import TypedDict
 
 import transformers
 from jaxtyping import Float, Int
@@ -20,21 +21,24 @@ class Sample(TypedDict):
 
 class DeepFakeBaseDataset(Dataset, ABC):
     def __init__(
-        self, paths: Sequence[Path | str], config: DatasetConfig | None = None
+        self,
+        paths: Sequence[Path | str],
+        config: DatasetConfig | None = None,
     ):
-        self.config = config if config else DatasetConfig()
+        self.config = config or DatasetConfig()
         self.samples: list[Sample] = []
 
         print(f"Processing {len(paths)} paths...")
         self._prepare_samples(paths)
         print(
-            f"Loaded {len(self.samples)} samples from {len(paths)} files/directories."
+            f"Loaded {len(self.samples)} samples from {len(paths)} files/directories.",
         )
 
         self.preprocessor = None
         if self.config.encoder.use_auto_processor:
             self.preprocessor = transformers.AutoProcessor.from_pretrained(
-                self.config.encoder.model, use_fast=True
+                self.config.encoder.model,
+                use_fast=True,
             )
 
     @abstractmethod
@@ -61,7 +65,7 @@ class DeepFakeBaseDataset(Dataset, ABC):
                         "chunk_idx": i,
                         "label": label,
                         "total_frames": frame_cnt,
-                    }
+                    },
                 )
 
     @abstractmethod
@@ -82,7 +86,8 @@ class DeepFakeBaseDataset(Dataset, ABC):
 
     @abstractmethod
     def __getitem__(
-        self, idx: int
+        self,
+        idx: int,
     ) -> tuple[Float[Tensor, "channel batch h w"], Int[Tensor, "batch"]]:  # ty:ignore[invalid-method-override]
         """자식 클래스에서 구현: 실제 데이터 로드"""
         raise NotImplementedError

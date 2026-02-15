@@ -1,6 +1,7 @@
 import math
 import os
-from typing import TYPE_CHECKING, Callable, cast
+from collections.abc import Callable
+from typing import TYPE_CHECKING, cast
 
 import torch
 from jaxtyping import Float, Int
@@ -22,7 +23,7 @@ class ImageProcessor:
     def get_frame_count(self, path: str) -> int:
         try:
             return len(
-                [f for f in os.listdir(path) if f.endswith((".jpg", ".png", ".bmp"))]
+                [f for f in os.listdir(path) if f.endswith((".jpg", ".png", ".bmp"))],
             )
         except Exception:
             return 0
@@ -31,7 +32,9 @@ class ImageProcessor:
         return math.ceil(frame_cnt / dataset.config.arch.num_frames)
 
     def getitem(
-        self, dataset: DeepFakeBaseDataset, idx: int
+        self,
+        dataset: DeepFakeBaseDataset,
+        idx: int,
     ) -> tuple[Float[Tensor, "channel batch h w"], Int[Tensor, "batch"]]:
         meta = dataset.samples[idx]
         folder_path, chunk_idx, label, total_frames = (
@@ -51,7 +54,8 @@ class ImageProcessor:
 
             try:
                 img_tensor_raw: Int[Tensor, "channel h w"] = decode_image(
-                    read_file(img_path), mode=ImageReadMode.RGB
+                    read_file(img_path),
+                    mode=ImageReadMode.RGB,
                 )
                 img_tensor_resized = v2.Resize(self.size)(img_tensor_raw)
                 img_tensor: Float[Tensor, "channel h w"]
@@ -65,12 +69,13 @@ class ImageProcessor:
                     torch.zeros(
                         (3, dataset.config.arch.img_size, dataset.config.arch.img_size),
                         dtype=torch.float32,
-                    )
+                    ),
                 )
 
         if frames_list:
             frames_tensor: Float[Tensor, "batch channel h w"] = torch.stack(
-                frames_list, dim=0
+                frames_list,
+                dim=0,
             )
             if dataset.config.encoder.use_auto_processor:
                 assert dataset.preprocessor is not None
@@ -79,7 +84,8 @@ class ImageProcessor:
                     dataset.preprocessor(images=frames_tensor, return_tensors="pt"),
                 )
                 frames_tensor = cast(
-                    'Float[Tensor, "batch channel h w"]', processed.pixel_values
+                    'Float[Tensor, "batch channel h w"]',
+                    processed.pixel_values,
                 )
             frames_tensor_out: Float[Tensor, "channel batch h w"] = (
                 frames_tensor.permute(1, 0, 2, 3)

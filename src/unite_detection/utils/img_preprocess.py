@@ -73,11 +73,13 @@ def preprocess_celebdf(src_root, dst_root, size=(384, 384), max_workers=8):
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
         list(
             tqdm(
-                executor.map(resize_single_video, tasks, chunksize=4), total=len(tasks)
-            )
+                executor.map(resize_single_video, tasks, chunksize=4),
+                total=len(tasks),
+            ),
         )
     copy2(
-        src_root / "List_of_testing_videos.txt", dst_root / "List_of_testing_videos.txt"
+        src_root / "List_of_testing_videos.txt",
+        dst_root / "List_of_testing_videos.txt",
     )
 
     print("Preprocessing completed.")
@@ -144,7 +146,7 @@ def preprocess_celebdf_frames(src_root, dst_root, size=(384, 384), max_workers=8
             tqdm(
                 executor.map(extract_frames_single_video, tasks, chunksize=1),
                 total=len(tasks),
-            )
+            ),
         )
 
     txt_src = src_root / "List_of_testing_videos.txt"
@@ -182,7 +184,7 @@ def process_single_image(args):
         return None  # 성공 시 None 반환
 
     except Exception as e:
-        return f"Exception at {src_path}: {str(e)}"
+        return f"Exception at {src_path}: {e!s}"
 
 
 def preprocess_gta_v(
@@ -241,7 +243,7 @@ def preprocess_gta_v(
         # tqdm을 사용하여 진행률 표시
         # imap_unordered가 리스트를 미리 만들지 않아 메모리 효율적이며 순서 상관없이 처리됨
         results = list(
-            tqdm(pool.imap_unordered(process_single_image, tasks), total=len(tasks))
+            tqdm(pool.imap_unordered(process_single_image, tasks), total=len(tasks)),
         )
 
     # 4. 결과 리포트

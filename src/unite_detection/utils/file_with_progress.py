@@ -10,19 +10,21 @@ def copy_with_progress(src: str | Path, dst: str | Path):
     file_size = os.path.getsize(src)
 
     # 파일을 바이너리 모드로 열기
-    with open(src, "rb") as fsrc:
-        with open(dst, "wb") as fdst:
-            # tqdm 설정 (단위는 바이트, 총 크기 지정)
-            with tqdm(
-                total=file_size, unit="B", unit_scale=True, desc=os.path.basename(src)
-            ) as pbar:
-                while True:
-                    # 1MB씩 읽어서 복사
-                    chunk = fsrc.read(1024 * 1024)
-                    if not chunk:
-                        break
-                    fdst.write(chunk)
-                    pbar.update(len(chunk))  # 프로그래스바 업데이트
+    with open(src, "rb") as fsrc, open(dst, "wb") as fdst:
+        # tqdm 설정 (단위는 바이트, 총 크기 지정)
+        with tqdm(
+            total=file_size,
+            unit="B",
+            unit_scale=True,
+            desc=os.path.basename(src),
+        ) as pbar:
+            while True:
+                # 1MB씩 읽어서 복사
+                chunk = fsrc.read(1024 * 1024)
+                if not chunk:
+                    break
+                fdst.write(chunk)
+                pbar.update(len(chunk))  # 프로그래스바 업데이트
 
 
 def unzip_by_size(zip_path: str | Path, extract_to: str | Path):

@@ -8,10 +8,10 @@ from .image_processor import ImageProcessor
 from .sail_vos_dataset import SailVosDataset
 
 __all__ = [
-    "DeepFakeBaseDataset",
-    "ImageProcessor",
-    "SailVosDataset",
     "CelebDFBaseDataset",
     "CelebDFImageDataset",
     "CelebDFVideoDataset",
+    "DeepFakeBaseDataset",
+    "ImageProcessor",
+    "SailVosDataset",
 ]

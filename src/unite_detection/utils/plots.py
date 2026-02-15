@@ -23,7 +23,9 @@ def plot_roc(data: VisualizationData, ctx: PlotContext):
 
 def plot_conf_mat(data: VisualizationData, ctx: PlotContext):
     conf_matrix = multiclass_confusion_matrix(
-        data.preds, data.labels, len(ctx.class_names)
+        data.preds,
+        data.labels,
+        len(ctx.class_names),
     )
     fig = plt.figure(figsize=(8, 6))
     _ = sns.heatmap(
@@ -104,7 +106,9 @@ def plot_tsne(data: VisualizationData, ctx: PlotContext, max_samples: int = 2000
 
 
 def plot_encoder_tsne(
-    data: VisualizationData, ctx: PlotContext, max_samples: int = 400
+    data: VisualizationData,
+    ctx: PlotContext,
+    max_samples: int = 400,
 ):
     # 데이터 준비
     tsne_embeds: list[np.ndarray] = []
@@ -125,7 +129,8 @@ def plot_encoder_tsne(
     # [Samples (P) 추출 및 샘플링]
     num_total_samples = data.ps.shape[0]
     sample_size = min(
-        num_total_samples, max_samples
+        num_total_samples,
+        max_samples,
     )  # 브라우저 부하 방지를 위해 적절히 조절
     indices = torch.randperm(num_total_samples)[:sample_size]
 

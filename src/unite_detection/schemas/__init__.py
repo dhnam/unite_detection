@@ -18,8 +18,9 @@ from unite_detection.schemas.schemas import (
 )
 
 __all__ = [
-    "ArchSchema",
     "ADLossConfig",
+    "ArchSchema",
+    "AugmentationConfig",
     "DataLoaderConfig",
     "DataModuleConfig",
     "DatasetConfig",
@@ -31,7 +32,6 @@ __all__ = [
     "UNITEClassifierConfig",
     "UNITEConfig",
     "UNITEOutput",
-    "AugmentationConfig",
     "Visualizable",
     "VisualizationData",
 ]

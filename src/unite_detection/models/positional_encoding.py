@@ -26,7 +26,7 @@ class TemporalPositionalEncoding(nn.Module):
         # 2. Div Term 계산 (논문 Eq 1의 분모 부분)
         # 10000^(2i/ds) 부분을 로그 스케일로 계산
         div_term: Float[Tensor, "frame embed_half"] = torch.exp(
-            torch.arange(0, embed_dim, 2).float() * (-math.log(10000.0) / embed_dim)
+            torch.arange(0, embed_dim, 2).float() * (-math.log(10000.0) / embed_dim),
         )
 
         # 3. PE Matrix 초기화 [max_len, d_model]
@@ -49,7 +49,8 @@ class TemporalPositionalEncoding(nn.Module):
 
     @override
     def forward(
-        self, x: Float[Tensor, "batch frame token embed"]
+        self,
+        x: Float[Tensor, "batch frame token embed"],
     ) -> Float[Tensor, "batch frame token embed"]:
         """
         Args:

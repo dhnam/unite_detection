@@ -8,9 +8,9 @@ from .img_preprocess import (
 
 __all__ = [
     "GPUSigLIPProcessor",
+    "copy_with_progress",
     "preprocess_celebdf",
     "preprocess_celebdf_frames",
     "preprocess_gta_v",
-    "copy_with_progress",
     "unzip_by_size",
 ]

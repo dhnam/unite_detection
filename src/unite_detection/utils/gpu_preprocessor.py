@@ -22,20 +22,26 @@ class GPUSigLIPProcessor:
         # 2. 정규화 설정
         # (x - 0.5) / 0.5 연산
         self.mean: Int[Tensor, "1 3 1 1"] = torch.tensor(config.image_mean).view(
-            1, 3, 1, 1
+            1,
+            3,
+            1,
+            1,
         )
         self.std: Int[Tensor, "1 3 1 1"] = torch.tensor(config.image_std).view(
-            1, 3, 1, 1
+            1,
+            3,
+            1,
+            1,
         )
         self.rescale_factor = config.rescale_factor
 
     def __call__(
-        self, video_tensor: Float[Tensor, "batch 3 frame H W"]
+        self,
+        video_tensor: Float[Tensor, "batch 3 frame H W"],
     ) -> Float[Tensor, "batch_frame 3 h w"]:
         """
         video_tensor: (batch, 3, frame, H, W), float32, GPU
         """
-        b, c, t, h, w = video_tensor.shape
         device = video_tensor.device
 
         # 차원 변경 (B*T, C, H, W)
