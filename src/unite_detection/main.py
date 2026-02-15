@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Annotated, Literal, override
+from typing import Annotated
 
 import kagglehub
 import lightning.pytorch as L
@@ -9,7 +9,6 @@ import wandb
 import yaml
 from lightning.pytorch.callbacks import Callback, LearningRateMonitor, ModelCheckpoint
 from lightning.pytorch.loggers import WandbLogger
-from pydantic import BaseModel, Field
 from rich import print
 from torchvision.transforms import v2
 
@@ -18,42 +17,7 @@ from unite_detection.lit_modules import (
     LitUNITEClassifier,
     VisualizationCallback,
 )
-from unite_detection.schemas import (
-    ArchSchema,
-    AugmentationConfig,
-    DataModuleConfig,
-    EncoderConfig,
-    UNITEClassifierConfig,
-)
-
-
-class TrainConfig(BaseModel):
-    project_name: str = "UNITE_deepfaek_classification"
-    use_ckpt: bool = True
-    ckpt_path: Path = Path("./checkpoints/")
-    ckpt_monitor: Literal[
-        "MulticlassAveragePrecision",
-        "MulticlassAccuracy",
-        "AUROC",
-    ] = "MulticlassAveragePrecision"
-    compile: bool = True
-    wandb_watch: bool = True
-    wandb_log_model: bool | Literal["all"] = False
-    max_epoch: int = 20
-    acc_grad: int = 2
-    arch: ArchSchema = Field(default_factory=ArchSchema)
-    encoder: EncoderConfig = Field(default_factory=EncoderConfig)
-    datamodule: DataModuleConfig = Field(default_factory=DataModuleConfig)
-    lit_unite: UNITEClassifierConfig = Field(default_factory=UNITEClassifierConfig)
-    augment: AugmentationConfig = Field(default_factory=AugmentationConfig)
-
-    @override
-    def model_post_init(self, __context):
-        self.datamodule.dataset.arch = self.arch
-        self.datamodule.dataset.encoder = self.encoder
-
-        self.lit_unite.arch = self.arch
-        self.lit_unite.unite_model.encoder = self.encoder
+from unite_detection.schemas import TrainConfig
 
 
 def represent_path(dumper: yaml.SafeDumper, data: Path):
@@ -93,6 +57,9 @@ def train(
     with open(config_path) as f:
         model_dict = yaml.safe_load(f)
     config = TrainConfig.model_validate(model_dict)
+
+    if config.lit_unite.unite_model.use_bfloat:
+        torch.set_float32_matmul_precision("high")
 
     transform_list: list[v2.Transform | None] = [
         v2.ToDtype(torch.uint8),

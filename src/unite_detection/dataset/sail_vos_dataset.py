@@ -13,6 +13,8 @@ class SailVosDataset(DeepFakeBaseDataset):
         config: DatasetConfig | None = None,
         ext: str = ".png",
     ):
+        super().__init__(paths, config)
+
         self.ext = ext
         self.config = config or DatasetConfig()
         self.processor = ImageProcessor(
@@ -20,7 +22,6 @@ class SailVosDataset(DeepFakeBaseDataset):
             (self.config.arch.img_size, self.config.arch.img_size),
         )
 
-        super().__init__(paths, config)
 
     def idx_to_filename(self, idx: int) -> str:
         return f"{idx:06d}{self.ext}"

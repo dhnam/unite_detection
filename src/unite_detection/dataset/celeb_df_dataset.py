@@ -81,10 +81,10 @@ class CelebDFVideoDataset(CelebDFBaseDataset):
 
             frames_tensor: Float[Tensor, "batch channel h w"]
             if self.config.encoder.use_auto_processor:
-                assert self.preprocessor is not None
+                assert self.auto_processor is not None
                 processed = cast(
                     "BatchFeature",
-                    self.preprocessor(images=pixel_value, return_tensors="pt"),
+                    self.auto_processor(images=pixel_value, return_tensors="pt"),
                 )
                 frames_tensor = cast(
                     'Float[Tensor, "batch channel h w"]',

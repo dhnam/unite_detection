@@ -9,9 +9,9 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 from unite_detection.dataset import (
+    CelebDFBaseDataset,
     CelebDFImageDataset,
     CelebDFVideoDataset,
-    DeepFakeBaseDataset,
 )
 from unite_detection.schemas import DataModuleConfig
 from unite_detection.utils import (
@@ -57,7 +57,7 @@ class PreprocessFunction(Protocol):
 
 class CelebDFManager(AbstractDatasetManager):
     preprocess_fn: PreprocessFunction
-    dataset_cls: type[DeepFakeBaseDataset]
+    dataset_cls: type[CelebDFBaseDataset]
 
     def __init__(self, config: DataModuleConfig):
         super().__init__(config)
@@ -75,7 +75,10 @@ class CelebDFManager(AbstractDatasetManager):
             self.preprocess_fn(
                 Path(path),
                 self.config.celeb_df_preprocess_path,
-                size=self.config.dataset.size,
+                size=(
+                    self.config.dataset.arch.img_size,
+                    self.config.dataset.arch.img_size,
+                ),
             )
             self.root = self.config.celeb_df_preprocess_path
         else:
@@ -87,7 +90,7 @@ class CelebDFManager(AbstractDatasetManager):
         all_paths = [
             Path(x)
             for x in self.root.glob(pattern)
-            if os.path.isdir(x) or x.suffix == "mp4"
+            if os.path.isdir(x) or x.suffix == ".mp4"
         ]
         txt_path = self.root / "List_of_testing_videos.txt"
         test_df = pd.read_csv(txt_path, sep=" ", header=None, names=["label", "path"])
@@ -151,7 +154,7 @@ class GTAManager(AbstractDatasetManager):
                 )
             self.root = self.config.gta_v_preprocess_path
         else:
-            self.root = self.config.gta_v_down_path / "Image"
+            self.root = self.config.gta_v_down_path / "mini-ref-sailvos" / "Images"
 
     @override
     def _get_splits(self):

@@ -4,13 +4,14 @@ from collections.abc import Callable, Sequence
 from pathlib import Path
 from typing import (
     TYPE_CHECKING,
+    Literal,
     NamedTuple,
     Protocol,
     runtime_checkable,
 )
 
 import torch
-from pydantic import BaseModel, ConfigDict, Field, computed_field
+from pydantic import BaseModel, ConfigDict, Field, computed_field, model_validator
 from torch import Tensor
 
 if TYPE_CHECKING:
@@ -29,7 +30,7 @@ class ArchSchema(BaseModel):
 
     num_cls: int = 2
     num_heads: int = 12
-    num_frames: int = 32
+    num_frames: int = 16
     img_size: int = 384
 
 
@@ -70,9 +71,11 @@ class UNITEClassifierConfig(BaseModel):
     optim: OptimizerConfig = Field(default_factory=OptimizerConfig)
     loss: LossConfig = Field(default_factory=LossConfig)
 
-    def model_post_init(self, __context):
+    @model_validator(mode="after")
+    def sync_internal(self):
         self.unite_model.arch = self.arch
         self.ad_loss.arch = self.arch
+        return self
 
 
 class DatasetConfig(BaseModel):
@@ -100,14 +103,14 @@ class SamplerConfig(BaseModel):
 
 class DataModuleConfig(BaseModel):
     celeb_df_preprocess_path: Path = Path("./celeb_preprocessed")
-    from_img: bool = True
+    from_img: bool = False
     val_split_ratio: float = 0.1
     use_gta_v: bool = True
     gta_v_preprocess_path: Path = Path("./gta_v_preprocessed")
     gta_v_zip_path: Path = Path("./mini-ref-sailvos.zip")
     gta_v_down_path: Path = Path("./gta_v")
     gta_v_gdrive_id: str = "1-0Vu4X-pqb4Da226g1OALHytAlMRCC84"
-    do_preprocess: bool = True
+    do_preprocess: bool = False
     loader: DataLoaderConfig = Field(default_factory=DataLoaderConfig)
     dataset: DatasetConfig = Field(default_factory=DatasetConfig)
     sampler: SamplerConfig = Field(default_factory=SamplerConfig)
@@ -156,6 +159,36 @@ class AugmentationConfig(BaseModel):
     color_jitter_contrast: float = 0.2
     jpeg: bool = True
     jpeg_quality_range: tuple[int, int] = (60, 100)
+
+
+class TrainConfig(BaseModel):
+    project_name: str = "UNITE_deepfaek_classification"
+    use_ckpt: bool = True
+    ckpt_path: Path = Path("./checkpoints/")
+    ckpt_monitor: Literal[
+        "MulticlassAveragePrecision",
+        "MulticlassAccuracy",
+        "AUROC",
+    ] = "MulticlassAveragePrecision"
+    compile: bool = True
+    wandb_watch: bool = True
+    wandb_log_model: bool | Literal["all"] = False
+    max_epoch: int = 20
+    acc_grad: int = 2
+    arch: ArchSchema = Field(default_factory=ArchSchema)
+    encoder: EncoderConfig = Field(default_factory=EncoderConfig)
+    datamodule: DataModuleConfig = Field(default_factory=DataModuleConfig)
+    lit_unite: UNITEClassifierConfig = Field(default_factory=UNITEClassifierConfig)
+    augment: AugmentationConfig = Field(default_factory=AugmentationConfig)
+
+    @model_validator(mode="after")
+    def sync_internal(self, __context):
+        self.datamodule.dataset.arch = self.arch
+        self.datamodule.dataset.encoder = self.encoder
+
+        self.lit_unite.arch = self.arch
+        self.lit_unite.unite_model.encoder = self.encoder
+        return self
 
 
 @runtime_checkable

@@ -15,20 +15,19 @@ class UNITE(nn.Module):
     def __init__(self, config: UNITEConfig | None = None):
         super().__init__()
 
-        if config is None:
-            config = UNITEConfig()
+        self.config = config or UNITEConfig
 
-        self.config = config
-
-        dtype = torch.bfloat16 if config.use_bfloat else torch.float16
+        dtype = torch.bfloat16 if self.config.use_bfloat else torch.float16
         self.vis_encoder = AutoModel.from_pretrained(
-            config.encoder.model,
+            self.config.encoder.model,
             device_map="auto",
             dtype=dtype,
             attn_implementation="flash_attention_2",
         )
         self.embed_size = self.vis_encoder.config.vision_config.hidden_size
-        processor = AutoProcessor.from_pretrained(config.encoder.model, use_fast=True)
+        processor = AutoProcessor.from_pretrained(
+            self.config.encoder.model, use_fast=True
+        )
         self.processor = GPUSigLIPProcessor(processor)
 
         for para in self.vis_encoder.parameters():
@@ -42,21 +41,23 @@ class UNITE(nn.Module):
 
         self.pos_embedding = TemporalPositionalEncoding(
             self.embed_size,
-            config.arch.num_frames,
-            config.dropout,
+            self.config.arch.num_frames,
+            self.config.dropout,
         )
         self.first_encoder = ViTEncoder(
             self.embed_size,
-            config.arch.num_heads,
-            config.dropout,
+            self.config.arch.num_heads,
+            self.config.dropout,
         )
         self.encoders = nn.ModuleList(
             [
-                ViTEncoder(self.embed_size, config.arch.num_heads, config.dropout)
+                ViTEncoder(
+                    self.embed_size, self.config.arch.num_heads, self.config.dropout,
+                )
                 for _ in range(3)
             ],
         )
-        self.mlp_head = nn.Linear(self.embed_size, config.arch.num_cls)
+        self.mlp_head = nn.Linear(self.embed_size, self.config.arch.num_cls)
 
     def forward(
         self,

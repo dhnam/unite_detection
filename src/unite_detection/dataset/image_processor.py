@@ -78,10 +78,10 @@ class ImageProcessor:
                 dim=0,
             )
             if dataset.config.encoder.use_auto_processor:
-                assert dataset.preprocessor is not None
+                assert dataset.auto_processor is not None
                 processed = cast(
                     "BatchFeature",
-                    dataset.preprocessor(images=frames_tensor, return_tensors="pt"),
+                    dataset.auto_processor(images=frames_tensor, return_tensors="pt"),
                 )
                 frames_tensor = cast(
                     'Float[Tensor, "batch channel h w"]',

@@ -22,7 +22,6 @@ dependencies = [
     "scikit-learn>=1.8.0",
     "seaborn>=0.13.2",
     "torchcodec==0.9.0",
-    "transformers>=5.1.0",
     "typer>=0.23.1",
     "types-seaborn>=0.13.2.20251221",
     "types-tqdm>=4.67.3.20260205",
@@ -39,10 +38,10 @@ conflicts = [
 ]
 
 [project.optional-dependencies]
-gpu = ["accelerate>=1.12.0", "lightning>=2.6.1", "torch==2.9.1", "torchvision==0.24.1", "flash-attn"]
+gpu = ["lightning>=2.6.1", "transformers[accelerate,sentencepiece]>=5.1.0", "torch==2.9.1", "torchvision==0.24.1", "flash-attn"]
 cpu = [
-    "accelerate>=1.12.0",
     "lightning>=2.6.1",
+    "transformers[accelerate,sentencepiece]>=5.1.0",
     "torch==2.9.1+cpu ; sys_platform != 'darwin' and (platform_machine == 'x86_64' or platform_machine == 'AMD64')",
     "torchvision==0.24.1+cpu ; sys_platform != 'darwin' and (platform_machine == 'x86_64' or platform_machine == 'AMD64')",
     "torch==2.9.1 ; sys_platform == 'darwin' or platform_machine == 'aarch64'",

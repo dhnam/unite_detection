@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from collections import Counter
 from collections.abc import Sequence
+from functools import wraps
 from pathlib import Path
 from typing import TypedDict
 
@@ -27,19 +28,39 @@ class DeepFakeBaseDataset(Dataset, ABC):
     ):
         self.config = config or DatasetConfig()
         self.samples: list[Sample] = []
+        self.auto_processor = None
+        self._paths = paths
 
-        print(f"Processing {len(paths)} paths...")
-        self._prepare_samples(paths)
-        print(
-            f"Loaded {len(self.samples)} samples from {len(paths)} files/directories.",
-        )
+    def __init_subclass__(cls, **kwarg):
+        super().__init_subclass__()
+        old_init = cls.__init__
 
-        self.preprocessor = None
-        if self.config.encoder.use_auto_processor:
-            self.preprocessor = transformers.AutoProcessor.from_pretrained(
-                self.config.encoder.model,
-                use_fast=True,
+        @wraps(old_init)
+        def new_init(self, *args, **kwargs):
+            if hasattr(self, "_prepared") and self._prepared:
+                return old_init(self, *args, **kwargs)
+
+            old_init(self, *args, **kwargs)
+            if hasattr(self, "_prepared") and self._prepared:
+                return
+
+            # For only leaf class
+            print(f"Processing {len(self._paths)} paths...")
+            self._prepare_samples(self._paths)
+            print(
+                f"Loaded {len(self.samples)} samples "
+                f"from {len(self._paths)} files/directories.",
             )
+
+            if self.config.encoder.use_auto_processor:
+                self.auto_processor = transformers.AutoProcessor.from_pretrained(
+                    self.config.encoder.model,
+                    use_fast=True,
+                )
+
+            self._prepared = True
+
+        cls.__init__ = new_init
 
     @abstractmethod
     def _get_label(self, path: str) -> int | None:

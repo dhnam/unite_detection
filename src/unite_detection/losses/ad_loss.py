@@ -11,25 +11,22 @@ from unite_detection.schemas import ADLossConfig
 class ADLoss(nn.Module):
     def __init__(self, config: ADLossConfig | None = None):
         super().__init__()
-        if config is None:
-            config = ADLossConfig()
-
-        self.config: ADLossConfig = config
+        self.config = config or ADLossConfig()
         # C shape: [num_classes, num_heads, max_len]
         # 논문 식(3)에 따라 센터를 각 클래스별로 유지해야 함
         # C = torch.zeros(num_cls, num_heads, max_len)
         # Try changing C to random normalization so that it might not collapse due to initial condition.
         c: Float[Tensor, "cls head frame"]
         c = torch.randn(
-            config.arch.num_cls,
-            config.arch.num_heads,
-            config.arch.num_frames,
+            self.config.arch.num_cls,
+            self.config.arch.num_heads,
+            self.config.arch.num_frames,
         )
         c = F.normalize(c, p=2, dim=2)
         self.register_buffer("C", c)
 
         delta_within: Float[Tensor, "cls"] = torch.tensor(
-            config.delta_within,
+            self.config.delta_within,
         )  # [0.01, -2.0] (True, Fake)
         self.register_buffer("delta_within", delta_within)
 

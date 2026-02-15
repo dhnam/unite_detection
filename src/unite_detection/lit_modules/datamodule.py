@@ -122,11 +122,11 @@ class DFDataModule(L.LightningDataModule):
     def train_dataloader(self):
         # 2. 현재 훈련 셋(Subset) 내의 클래스별 개수 계산
         gta = None
-        dataset: Dataset = self.celeb_val
+        dataset: Dataset = self.celeb_train
         if self.config.use_gta_v:
             gta = self.gta_train
-            dataset = ConcatDataset([dataset, self.gta_val])
-        sampler, dataset = self.sampler_factory.create_sampler(self.celeb_train, gta)
+            dataset = ConcatDataset([dataset, self.gta_train])
+        sampler = self.sampler_factory.create_sampler(self.celeb_train, gta)
         return DataLoader(
             dataset,
             **self.config.loader.model_dump(),

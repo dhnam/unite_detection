@@ -162,11 +162,11 @@ class LitUNITEClassifier(L.LightningModule):
 
         self._val_buffer.append(
             VisualizationData(
-                logits=logit.detach().cpu(),
-                labels=y.detach().cpu(),
-                embeds=embed.detach().cpu(),
-                ps=F.normalize(P, p=2, dim=2).detach().cpu(),
-                cs=self.ad_loss.C.detach().cpu(),
+                logits=logit.detach().cpu().float(),
+                labels=y.detach().cpu().long(),
+                embeds=embed.detach().cpu().float(),
+                ps=F.normalize(P, p=2, dim=2).detach().cpu().float(),
+                cs=self.ad_loss.C.detach().cpu().float(),
             ),
         )
 
@@ -192,9 +192,9 @@ class LitUNITEClassifier(L.LightningModule):
 
         self._test_buffer.append(
             VisualizationData(
-                logits=logit.detach().cpu(),
-                labels=y.detach().cpu(),
-                embeds=embed.detach().cpu(),
+                logits=logit.detach().cpu().float(),
+                labels=y.detach().cpu().long(),
+                embeds=embed.detach().cpu().float(),
             ),
         )
 
