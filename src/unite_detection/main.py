@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Literal, override
+from typing import Annotated, Literal, override
 
 import kagglehub
 import lightning.pytorch as L
@@ -82,6 +82,7 @@ def train(
     config_path: Path = Path("./example.yaml"),
     resume: bool = False,
     run_name: str | None = None,
+    fast_dev_run: Annotated[bool, typer.Option("--fast-dev_run")] = False,
 ):
 
     print("Logging into wandb and kaggle...")
@@ -129,7 +130,7 @@ def train(
     config.datamodule.dataset.transform = transform
     datamodule = DFDataModule(config.datamodule)
     lit_classifier = LitUNITEClassifier(config.lit_unite)
-    if config.compile:
+    if config.compile and not fast_dev_run:
         lit_classifier = torch.compile(lit_classifier)
 
     if not resume:
@@ -149,7 +150,7 @@ def train(
         )
 
     callbacks: list[Callback] = [VisualizationCallback(), LearningRateMonitor()]
-    if config.use_ckpt:
+    if config.use_ckpt and not fast_dev_run:
         callbacks.append(
             ModelCheckpoint(
                 dirpath=config.ckpt_path,
@@ -165,9 +166,10 @@ def train(
         callbacks=callbacks,
         num_sanity_val_steps=0,
         accumulate_grad_batches=config.acc_grad,
+        fast_dev_run=fast_dev_run,
     )
 
-    if config.wandb_watch:
+    if config.wandb_watch and not fast_dev_run:
         wandb_logger.watch(lit_classifier)
 
     if not resume:
