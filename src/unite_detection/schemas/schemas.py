@@ -57,7 +57,7 @@ class ADLossConfig(BaseModel):
 class OptimizerConfig(BaseModel):
     lr: float = 1e-4
     decay_steps: int = 1000
-    warmup_steps:int = 100
+    warmup_steps: int = 100
 
 
 class LossConfig(BaseModel):
@@ -194,11 +194,20 @@ class TrainConfig(BaseModel):
 
 @runtime_checkable
 class Visualizable(Protocol):
-    num_cls: int
-    class_names: Sequence[str]
-    num_heads: int
-    val_output: VisualizationData | None
-    test_output: VisualizationData | None
+    @property
+    def num_cls(self) -> int: ...
+
+    @property
+    def class_names(self) -> Sequence[str]: ...
+
+    @property
+    def num_heads(self) -> int: ...
+
+    @property
+    def val_output(self) -> VisualizationData | None: ...
+
+    @property
+    def test_output(self) -> VisualizationData | None: ...
 
 
 class PlotContext(BaseModel):
