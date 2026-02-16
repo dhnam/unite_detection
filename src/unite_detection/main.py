@@ -43,7 +43,9 @@ def init_yaml(path: Path = Path("./example.yaml")):
 
 @app.command(short_help="Train UNITE model using given yaml file.")
 def train(
-    config_path: Path = Path("./example.yaml"),
+    config_path: Annotated[Path, typer.Option(exists=True, file_okay=True)] = Path(
+        "./example.yaml"
+    ),
     resume: bool = False,
     run_name: str | None = None,
     fast_dev_run: Annotated[bool, typer.Option("--fast-dev-run")] = False,
@@ -148,6 +150,62 @@ def train(
 
     wandb.finish()
 
+
+@app.command()
+def test(
+    ckpt_path: Annotated[Path, typer.Argument(exitss=True, file_okay=True)],
+    config_path: Annotated[Path, typer.Option(exists=True, file_okay=True)] = Path(
+        "./example.yaml"
+    ),
+    run_id: Annotated[
+        str | None,
+        typer.Option(
+            prompt="Input run id to log (or leave it blank)", show_default=False
+        ),
+    ] = "",
+):
+    run_id = run_id if run_id != "" else None
+
+    print("Logging into wandb and kaggle...")
+    wandb.login()
+    kagglehub.login()
+
+    model_dict: dict
+    with open(config_path) as f:
+        model_dict = yaml.safe_load(f)
+    config = TrainConfig.model_validate(model_dict)
+
+    if config.lit_unite.unite_model.use_bfloat:
+        torch.set_float32_matmul_precision("high")
+
+    datamodule = DFDataModule(config.datamodule)
+    lit_classifier = LitUNITEClassifier(config.lit_unite)
+    wandb_logger: WandbLogger
+    if run_id:
+        wandb_logger = WandbLogger(
+            project=config.project_name,
+            log_model=config.wandb_log_model,
+            id=run_id,
+            resume="must",
+        )
+    else:
+        wandb_logger = WandbLogger(
+            project=config.project_name,
+            log_model=config.wandb_log_model,
+        )
+    
+    trainer = L.Trainer(
+        max_epochs=config.max_epoch,
+        precision="bf16-mixed" if config.lit_unite.unite_model.use_bfloat else 16,
+        logger=wandb_logger,
+        callbacks=callbacks,
+        num_sanity_val_steps=0,
+        accumulate_grad_batches=config.acc_grad,
+        fast_dev_run=fast_dev_run,
+    )
+
+    trainer.test(lit_classifier, datamodule=datamodule, ckpt_path=ckpt_path)
+    wandb.finish()
 
 if __name__ == "__main__":
     app()
