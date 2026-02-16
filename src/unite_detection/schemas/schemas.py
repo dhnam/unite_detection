@@ -163,7 +163,7 @@ class AugmentationConfig(BaseModel):
 
 
 class TrainConfig(BaseModel):
-    project_name: str = "UNITE_deepfaek_classification"
+    project_name: str = "UNITE_deepfake_classification"
     use_ckpt: bool = True
     ckpt_path: Path = Path("./checkpoints/")
     ckpt_monitor: Literal[
