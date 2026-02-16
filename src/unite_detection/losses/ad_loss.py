@@ -15,7 +15,8 @@ class ADLoss(nn.Module):
         # C shape: [num_classes, num_heads, max_len]
         # 논문 식(3)에 따라 센터를 각 클래스별로 유지해야 함
         # C = torch.zeros(num_cls, num_heads, max_len)
-        # Try changing C to random normalization so that it might not collapse due to initial condition.
+        # Try changing C to random normalization so that
+        # it might not collapse due to initial condition.
         c: Float[Tensor, "cls head frame"]
         c = torch.randn(
             self.config.arch.num_cls,
@@ -88,7 +89,8 @@ class ADLoss(nn.Module):
                         ] + self.config.eta * batch_class_mean.detach()
 
                     # Calculating between class loss here (eq. 5)
-                    # Note that in paper it is loss between C and C, but I edited it to P and P
+                    # Note that in paper it is loss between C and C,
+                    # but I edited it to P and P
                     # because C is detached from graph thus cannot have valid gradient.
                     # So assume center of P is almost C.
                     dist_matrix: Float[Tensor, "head head"]

@@ -123,8 +123,10 @@ class UNITE(nn.Module):
         transformer_out: Float[Tensor, "batch tot_w_cls embed"]
 
         if return_ad_param:
+            type trans_out = Float[Tensor, "batch tot_w_cls embed"]
+            type attn_out = Float[Tensor, "batch tot_w_cls head haed_dim"]
             transformer_out, attn_output = cast(
-                'tuple[Float[Tensor, "batch tot_w_cls embed"], Float[Tensor, "batch tot_w_cls head head_dim"]]',
+                'tuple[trans_out, attn_out]',
                 self.first_encoder(transform_in, return_attn_output=True),
             )  # head_dim = embed // head
 

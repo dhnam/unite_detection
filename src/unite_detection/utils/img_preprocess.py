@@ -205,7 +205,8 @@ def preprocess_gta_v(
     print(f"Scanning files in {source_dir}...")
 
     # glob 패턴: source_dir 아래 모든 폴더(*) 아래 images 폴더 아래 *.bmp
-    # 혹은 재귀적으로 찾으려면 rglob 사용 가능. 여기서는 데이터셋 구조에 맞춰 명시적으로 찾습니다.
+    # 혹은 재귀적으로 찾으려면 rglob 사용 가능.
+    # 여기서는 데이터셋 구조에 맞춰 명시적으로 찾습니다.
     # SAIL-VOS 구조: root -> Images -> vid_seq -> *.bmp
     all_files = list(source_path.glob("Images/*/*.bmp"))
 
@@ -241,7 +242,8 @@ def preprocess_gta_v(
 
     with Pool(processes=num_workers) as pool:
         # tqdm을 사용하여 진행률 표시
-        # imap_unordered가 리스트를 미리 만들지 않아 메모리 효율적이며 순서 상관없이 처리됨
+        # imap_unordered가 리스트를 미리 만들지 않아
+        # 메모리 효율적이며 순서 상관없이 처리됨
         results = list(
             tqdm(pool.imap_unordered(process_single_image, tasks), total=len(tasks)),
         )

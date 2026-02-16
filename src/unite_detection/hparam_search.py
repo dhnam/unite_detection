@@ -86,7 +86,7 @@ transform = v2.Compose(
         v2.RandomHorizontalFlip(p=0.5),
         # v2.RandomApply([v2.RandomRotation((-10, 10))]), # Quite slow?
         v2.RandomApply([v2.GaussianBlur(kernel_size=(3, 7))]),  # Managable...
-        # v2.RandomApply([v2.ColorJitter(brightness=0.2, contrast=0.2)]), # Looks slow...
+        # v2.RandomApply([v2.ColorJitter(brightness=0.2, contrast=0.2)]), # Slow...
         v2.RandomApply([v2.JPEG((60, 100))]),
         v2.ToDtype(torch.float32),
     ],
@@ -104,8 +104,9 @@ def sweep_train():
             f"L1_{config.lambda_1}_L2_{config.lambda_2}_fake_{config.delta_within_fake}"
         )
 
+        model = f"google/siglip2-base-patch16-{384 if config.setting == 'big' else 224}"
         encoder_config = EncoderConfig(
-            model=f"google/siglip2-base-patch16-{384 if config.setting == 'big' else 224}",
+            model=model,
             use_auto_processor=True,
         )
 
