@@ -1,11 +1,10 @@
-from collections.abc import Sequence
-from typing import Protocol, TypeGuard, override, runtime_checkable
+from typing import Any, Protocol, TypeGuard, override, runtime_checkable
 
 import matplotlib.pyplot as plt
 import pytorch_lightning as L
 import wandb
 
-from unite_detection.schemas import PlotContext, VisualizationData
+from unite_detection.schemas import PlotContext, Visualizable, VisualizationData
 from unite_detection.utils.plots import (
     plot_conf_mat,
     plot_encoder_tsne,
@@ -15,29 +14,18 @@ from unite_detection.utils.plots import (
 
 
 @runtime_checkable
-class VisualizableLitModule(Protocol):
-    @property
-    def num_cls(self) -> int: ...
-
-    @property
-    def class_names(self) -> Sequence[str]: ...
-
-    @property
-    def num_heads(self) -> int: ...
-
-    @property
-    def val_output(self) -> VisualizationData | None: ...
-
-    @property
-    def test_output(self) -> VisualizationData | None: ...
-
+class TrainContext(Protocol):
     @property
     def current_epoch(self) -> int: ...
 
     @property
     def logger(self) -> L.logging.Logger: ...
 
-def is_visualizable[T](module: T) -> TypeGuard[VisualizableLitModule]:
+@runtime_checkable
+class VisualizableLitModule(Visualizable, TrainContext, Protocol):
+    ...
+
+def is_visualizable(module: Any) -> TypeGuard[VisualizableLitModule]:
     return isinstance(module, VisualizableLitModule)
 
 
