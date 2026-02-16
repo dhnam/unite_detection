@@ -1,9 +1,11 @@
 from collections.abc import Sequence
 from pathlib import Path
+from typing import overload
 
-from unite_detection.dataset.base_dataset import DeepFakeBaseDataset
-from unite_detection.dataset.image_processor import ImageProcessor
+from unite_detection.processor import ImageProcessor
 from unite_detection.schemas import DatasetConfig
+
+from .base_dataset import DeepFakeBaseDataset
 
 
 class SailVosDataset(DeepFakeBaseDataset):
@@ -16,24 +18,13 @@ class SailVosDataset(DeepFakeBaseDataset):
         super().__init__(paths, config)
 
         self.ext = ext
-        self.config = config or DatasetConfig()
-        self.processor = ImageProcessor(
-            self.idx_to_filename,
-            (self.config.arch.img_size, self.config.arch.img_size),
-        )
 
+    @overload
+    def _create_processor(self):
+        return ImageProcessor(self.config, self.idx_to_filename)
 
     def idx_to_filename(self, idx: int) -> str:
         return f"{idx:06d}{self.ext}"
 
     def _get_label(self, path: str) -> int | None:
         return 1
-
-    def _get_frame_count(self, path: str) -> int:
-        return self.processor.get_frame_count(path)
-
-    def _calculate_num_chunks(self, frame_cnt: int) -> int:
-        return self.processor.calculate_num_chunks(self, frame_cnt)
-
-    def __getitem__(self, idx):
-        return self.processor.getitem(self, idx)

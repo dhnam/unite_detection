@@ -1,23 +1,14 @@
 from abc import ABC, abstractmethod
 from collections import Counter
 from collections.abc import Sequence
-from functools import wraps
 from pathlib import Path
-from typing import TypedDict
 
-import transformers
 from jaxtyping import Float, Int
 from torch import Tensor
 from torch.utils.data import Dataset
 
-from unite_detection.schemas import DatasetConfig
-
-
-class Sample(TypedDict):
-    path: str
-    chunk_idx: int
-    label: int
-    total_frames: int
+from unite_detection.processor import BaseProcessor
+from unite_detection.schemas import DatasetConfig, FileMeta
 
 
 class DeepFakeBaseDataset(Dataset, ABC):
@@ -27,40 +18,35 @@ class DeepFakeBaseDataset(Dataset, ABC):
         config: DatasetConfig | None = None,
     ):
         self.config = config or DatasetConfig()
-        self.samples: list[Sample] = []
-        self.auto_processor = None
+        self._samples: list[FileMeta] | None = None
+        self._processor: BaseProcessor | None = None
         self._paths = paths
 
-    def __init_subclass__(cls, **kwarg):
-        super().__init_subclass__()
-        old_init = cls.__init__
 
-        @wraps(old_init)
-        def new_init(self, *args, **kwargs):
-            if hasattr(self, "_prepared") and self._prepared:
-                return old_init(self, *args, **kwargs)
+    @property
+    def processor(self) -> BaseProcessor:
+        """Lazy Initialization"""
+        if self._processor is None:
+            self._processor = self._create_processor()
+        return self._processor
 
-            old_init(self, *args, **kwargs)
-            if hasattr(self, "_prepared") and self._prepared:
-                return
-
-            # For only leaf class
+    @property
+    def samples(self) -> list[FileMeta]:
+        """Lazy Initialization"""
+        if self._samples is None:
             print(f"Processing {len(self._paths)} paths...")
+            self._samples = []
             self._prepare_samples(self._paths)
             print(
                 f"Loaded {len(self.samples)} samples "
                 f"from {len(self._paths)} files/directories.",
             )
+        return self._samples
 
-            if self.config.encoder.use_auto_processor:
-                self.auto_processor = transformers.AutoProcessor.from_pretrained(
-                    self.config.encoder.model,
-                    use_fast=True,
-                )
 
-            self._prepared = True
-
-        cls.__init__ = new_init
+    @abstractmethod
+    def _create_processor(self) -> BaseProcessor:
+        raise NotImplementedError
 
     @abstractmethod
     def _get_label(self, path: str) -> int | None:
@@ -74,13 +60,13 @@ class DeepFakeBaseDataset(Dataset, ABC):
             if label is None:
                 continue
 
-            frame_cnt = self._get_frame_count(path_str)
+            frame_cnt = self.processor.get_frame_count(path_str)
             if frame_cnt <= 0:
                 continue
 
-            num_chunks = self._calculate_num_chunks(frame_cnt)
+            num_chunks = self.processor.calculate_num_chunks(frame_cnt)
             for i in range(num_chunks):
-                self.samples.append(
+                self._samples.append(
                     {
                         "path": path_str,
                         "chunk_idx": i,
@@ -89,26 +75,15 @@ class DeepFakeBaseDataset(Dataset, ABC):
                     },
                 )
 
-    @abstractmethod
-    def _get_frame_count(self, path: str) -> int:
-        """자식 클래스에서 구현: 전체 프레임 수 반환"""
-        raise NotImplementedError
-
-    @abstractmethod
-    def _calculate_num_chunks(self, frame_cnt: int) -> int:
-        """자식 클래스에서 구현: 프레임 수에 따른 청크 개수 계산"""
-        raise NotImplementedError
-
     def get_label_counter(self) -> Counter[int]:
         return Counter([x["label"] for x in self.samples])
 
     def __len__(self):
         return len(self.samples)
 
-    @abstractmethod
     def __getitem__(
         self,
         idx: int,
     ) -> tuple[Float[Tensor, "channel batch h w"], Int[Tensor, "batch"]]:  # ty:ignore[invalid-method-override]
-        """자식 클래스에서 구현: 실제 데이터 로드"""
-        raise NotImplementedError
+
+        return self.processor.getitem(self.samples[idx])
