@@ -128,6 +128,7 @@ def train(
         )
 
     trainer = L.Trainer(
+        max_epochs=config.max_epoch,
         precision="bf16-mixed" if config.lit_unite.unite_model.use_bfloat else 16,
         logger=wandb_logger,
         callbacks=callbacks,
