@@ -52,7 +52,9 @@ class UNITE(nn.Module):
         self.encoders = nn.ModuleList(
             [
                 ViTEncoder(
-                    self.embed_size, self.config.arch.num_heads, self.config.dropout,
+                    self.embed_size,
+                    self.config.arch.num_heads,
+                    self.config.dropout,
                 )
                 for _ in range(3)
             ],

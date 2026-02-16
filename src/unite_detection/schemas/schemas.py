@@ -23,11 +23,13 @@ class EncoderConfig(BaseModel):
     model: str = "google/siglip2-base-patch16-384"
     use_auto_processor: bool = True
 
+
 class FileMeta(TypedDict):
     path: str
     chunk_idx: int
     label: int
     total_frames: int
+
 
 class ArchSchema(BaseModel):
     """

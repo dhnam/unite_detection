@@ -22,7 +22,6 @@ class DeepFakeBaseDataset(Dataset, ABC):
         self._processor: BaseProcessor | None = None
         self._paths = paths
 
-
     @property
     def processor(self) -> BaseProcessor:
         """Lazy Initialization"""
@@ -42,7 +41,6 @@ class DeepFakeBaseDataset(Dataset, ABC):
                 f"from {len(self._paths)} files/directories.",
             )
         return self._samples
-
 
     @abstractmethod
     def _create_processor(self) -> BaseProcessor:

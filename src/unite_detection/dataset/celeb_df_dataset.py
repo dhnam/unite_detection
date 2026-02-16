@@ -27,10 +27,10 @@ class CelebDFVideoDataset(CelebDFBaseDataset):
     """
     비디오 파일(.mp4 등)에서 직접 프레임을 추출하는 데이터셋
     """
+
     @override
     def _create_processor(self):
         return VideoProcessor(self.config)
-
 
 
 class CelebDFImageDataset(CelebDFBaseDataset):
@@ -45,4 +45,3 @@ class CelebDFImageDataset(CelebDFBaseDataset):
     @staticmethod
     def idx_to_filename(idx: int) -> str:
         return f"frame_{idx + 1:06d}.jpg"
-

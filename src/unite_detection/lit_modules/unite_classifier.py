@@ -208,8 +208,7 @@ class LitUNITEClassifier(L.LightningModule):
 
     @override
     def on_test_epoch_end(self):
-        self.test_output = VisualizationData.from_step_output(
-            self._test_buffer)
+        self.test_output = VisualizationData.from_step_output(self._test_buffer)
         self._test_buffer.clear()
 
     @override
@@ -223,8 +222,7 @@ class LitUNITEClassifier(L.LightningModule):
 
     @override
     def configure_optimizers(self):
-        optim = torch.optim.AdamW(
-            self.model.parameters(), lr=self.config.optim.lr)
+        optim = torch.optim.AdamW(self.model.parameters(), lr=self.config.optim.lr)
 
         scheduler_warmup = torch.optim.lr_scheduler.LinearLR(
             optim,
@@ -243,7 +241,6 @@ class LitUNITEClassifier(L.LightningModule):
             [scheduler_warmup, scheduler_step],
             [self.config.optim.decay_steps],
         )
-            
 
         return {
             "optimizer": optim,
