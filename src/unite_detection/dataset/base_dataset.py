@@ -49,13 +49,13 @@ class DeepFakeBaseDataset(Dataset, ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def _get_label(self, path: str) -> int | None:
+    def _get_label(self, path: Path) -> int | None:
         raise NotImplementedError
 
     def _prepare_samples(self, paths: Sequence[Path | str]):
         """상속받는 클래스에서 각자의 방식으로 samples 리스트를 채움"""
         for path in paths:
-            path_str = str(path)
+            path_str = Path(path)
             label = self._get_label(path_str)
             if label is None:
                 continue

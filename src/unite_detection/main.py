@@ -10,8 +10,10 @@ import yaml
 from lightning.pytorch.callbacks import Callback, LearningRateMonitor, ModelCheckpoint
 from lightning.pytorch.loggers import WandbLogger
 from rich import print
+from torch.utils.data import DataLoader
 from torchvision.transforms import v2
 
+from unite_detection.dataset import CustomVideoDataset
 from unite_detection.lit_modules import (
     DFDataModule,
     LitUNITEClassifier,
@@ -194,18 +196,44 @@ def test(
             log_model=config.wandb_log_model,
         )
     
+    callbacks: list[Callback] = [VisualizationCallback()]
+
     trainer = L.Trainer(
-        max_epochs=config.max_epoch,
         precision="bf16-mixed" if config.lit_unite.unite_model.use_bfloat else 16,
         logger=wandb_logger,
         callbacks=callbacks,
-        num_sanity_val_steps=0,
-        accumulate_grad_batches=config.acc_grad,
-        fast_dev_run=fast_dev_run,
     )
 
     trainer.test(lit_classifier, datamodule=datamodule, ckpt_path=ckpt_path)
     wandb.finish()
+
+@app.command(short_help="Predict with given video directory.")
+def predict(
+    ckpt_path: Annotated[Path, typer.Argument(exists=True, file_okay=True)],
+    input_dir: Annotated[Path, typer.Argument(exists=True, dir_okay=True)],
+    config_path: Annotated[Path, typer.Option(exists=True, file_okay=True)] = Path(
+        "./example.yaml"
+    ),
+):
+    model_dict: dict
+    with open(config_path) as f:
+        model_dict = yaml.safe_load(f)
+    config = TrainConfig.model_validate(model_dict)
+
+    predict_files = [file for file in input_dir.glob("*") if file.is_file()]
+    predict_dataset = CustomVideoDataset(predict_files, config.datamodule.dataset)
+    loader = DataLoader(
+        predict_dataset,
+        config.datamodule.loader.batch_size,
+    )
+
+    lit_classifier = LitUNITEClassifier(config.lit_unite)
+    trainer = L.Trainer(
+        precision="bf16-mixed" if config.lit_unite.unite_model.use_bfloat else 16,
+        num_sanity_val_steps=0,
+    )
+
+    print(trainer.predict(lit_classifier, loader))
 
 if __name__ == "__main__":
     app()

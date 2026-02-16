@@ -4,6 +4,7 @@ from .celeb_df_dataset import (
     CelebDFImageDataset,
     CelebDFVideoDataset,
 )
+from .custom_video_dataset import CustomVideoDataset
 from .sail_vos_dataset import SailVosDataset
 
 __all__ = [
@@ -11,5 +12,6 @@ __all__ = [
     "CelebDFImageDataset",
     "CelebDFVideoDataset",
     "DeepFakeBaseDataset",
+    "CustomVideoDataset",
     "SailVosDataset",
 ]

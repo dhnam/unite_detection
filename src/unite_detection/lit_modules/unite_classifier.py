@@ -213,6 +213,15 @@ class LitUNITEClassifier(L.LightningModule):
         self._test_buffer.clear()
 
     @override
+    def predict_step(
+        self,
+        batch: tuple[Float[Tensor, "batch channel frame h w"], Float[Tensor, "batch"]],
+        batch_idx: int,
+    ):
+        x, _ = batch
+        return self.model(x)
+
+    @override
     def configure_optimizers(self):
         optim = torch.optim.AdamW(
             self.model.parameters(), lr=self.config.optim.lr)

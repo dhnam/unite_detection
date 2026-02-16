@@ -1,5 +1,6 @@
 from abc import ABC
-from typing import overload
+from pathlib import Path
+from typing import override
 
 from unite_detection.processor import ImageProcessor, VideoProcessor
 
@@ -11,9 +12,10 @@ class CelebDFBaseDataset(DeepFakeBaseDataset, ABC):
     Celeb-DF 데이터셋의 공통 기능을 담은 부모 클래스
     """
 
-    def _get_label(self, path: str) -> int | None:
+    @override
+    def _get_label(self, path: Path) -> int | None:
         """폴더명 기반 레이블 결정"""
-        rel_path = path.replace("\\", "/")
+        rel_path = path.parts
         if "YouTube-real" in rel_path or "Celeb-real" in rel_path:
             return 0
         elif "Celeb-synthesis" in rel_path:
@@ -25,7 +27,7 @@ class CelebDFVideoDataset(CelebDFBaseDataset):
     """
     비디오 파일(.mp4 등)에서 직접 프레임을 추출하는 데이터셋
     """
-    @overload
+    @override
     def _create_processor(self):
         return VideoProcessor(self.config)
 
@@ -36,7 +38,7 @@ class CelebDFImageDataset(CelebDFBaseDataset):
     이미지 파일이 저장된 폴더에서 프레임을 읽어오는 데이터셋
     """
 
-    @overload
+    @override
     def _create_processor(self):
         return ImageProcessor(self.config, self.idx_to_filename)
 
