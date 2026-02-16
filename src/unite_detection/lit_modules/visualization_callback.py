@@ -1,10 +1,11 @@
-from typing import Protocol, TypeGuard, override
+from collections.abc import Sequence
+from typing import Protocol, TypeGuard, override, runtime_checkable
 
 import matplotlib.pyplot as plt
 import pytorch_lightning as L
 import wandb
 
-from unite_detection.schemas import PlotContext, Visualizable, VisualizationData
+from unite_detection.schemas import PlotContext, VisualizationData
 from unite_detection.utils.plots import (
     plot_conf_mat,
     plot_encoder_tsne,
@@ -12,21 +13,41 @@ from unite_detection.utils.plots import (
     plot_tsne,
 )
 
-class VisualizableLitModule(Protocol)
 
-def is_visualizable[T](module: T) -> TypeGuard[Visualizable]:
-    return isinstance(module, Visualizable)
+@runtime_checkable
+class VisualizableLitModule(Protocol):
+    @property
+    def num_cls(self) -> int: ...
+
+    @property
+    def class_names(self) -> Sequence[str]: ...
+
+    @property
+    def num_heads(self) -> int: ...
+
+    @property
+    def val_output(self) -> VisualizationData | None: ...
+
+    @property
+    def test_output(self) -> VisualizationData | None: ...
+
+    @property
+    def current_epoch(self) -> int: ...
+
+    @property
+    def logger(self) -> L.logging.Logger: ...
+
+def is_visualizable[T](module: T) -> TypeGuard[VisualizableLitModule]:
+    return isinstance(module, VisualizableLitModule)
 
 
 class VisualizationCallback(L.Callback):
     def _visualize_all(
         self,
-        pl_module: L.LightningModule,
+        pl_module: VisualizableLitModule,
         data: VisualizationData,
         stage: str,
     ):
-        if not is_visualizable(pl_module):
-            raise TypeError(f"{type(pl_module)=} is not Visualizable")
         ctx = PlotContext(
             class_names=pl_module.class_names,
             stage=stage,
@@ -58,14 +79,14 @@ class VisualizationCallback(L.Callback):
             plt.close(fig_enc_tsne)
 
         if pl_module.logger:
-            pl_module.logger.experiment.log(log_dict)
+            pl_module.logger.experiment.log(log_dict)  # ty:ignore[unresolved-attribute]
 
     @override
     def on_validation_end(self, trainer: L.Trainer, pl_module: L.LightningModule):
         if trainer.sanity_checking:
             return
-        if not isinstance(pl_module, Visualizable):
-            return
+        if not is_visualizable(pl_module):
+            raise TypeError(f"{type(pl_module)=} is not Visualizable lightning module")
         data = pl_module.val_output
         if data is None:
             return
@@ -74,8 +95,8 @@ class VisualizationCallback(L.Callback):
 
     @override
     def on_test_end(self, trainer: L.Trainer, pl_module: L.LightningModule):
-        if not isinstance(pl_module, Visualizable):
-            return
+        if not is_visualizable(pl_module):
+            raise TypeError(f"{type(pl_module)=} is not Visualizable lightning module")
         data = pl_module.test_output
         if data is None:
             return

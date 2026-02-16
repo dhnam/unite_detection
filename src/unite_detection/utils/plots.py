@@ -15,7 +15,7 @@ from unite_detection.schemas import PlotContext, VisualizationData
 
 def plot_roc(data: VisualizationData, ctx: PlotContext):
     roc = MulticlassROC(len(ctx.class_names))
-    roc.update(data.logits, data.labels)
+    roc.update(data.logits, data.labels)  # ty:ignore[invalid-argument-type]
     fig, _ = roc.plot()
     roc.reset()
     return fig

@@ -128,8 +128,8 @@ trainer = L.Trainer(
     max_epochs=20,
     # max_steps=10,
     # profiler=profiler,
-    logger=wandb_logger,
-    callbacks=[visual, ckpt_drive, lr_monitor],
+    logger=wandb_logger,  # ty:ignore[invalid-argument-type]
+    callbacks=[visual, ckpt_drive, lr_monitor],  # ty:ignore[invalid-argument-type]
     precision="bf16-mixed",
     log_every_n_steps=50,
     num_sanity_val_steps=0,
@@ -139,6 +139,6 @@ trainer = L.Trainer(
 )
 
 
-wandb_logger.watch(lit_classifier)
+wandb_logger.watch(lit_classifier)  # ty:ignore[invalid-argument-type]
 
-trainer.fit(lit_classifier, datamodule=datamodule)
+trainer.fit(lit_classifier, datamodule=datamodule)  # ty:ignore[invalid-argument-type]
