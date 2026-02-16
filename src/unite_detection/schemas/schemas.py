@@ -57,6 +57,7 @@ class ADLossConfig(BaseModel):
 class OptimizerConfig(BaseModel):
     lr: float = 1e-4
     decay_steps: int = 1000
+    warmup_steps:int = 100
 
 
 class LossConfig(BaseModel):

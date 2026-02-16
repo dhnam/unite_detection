@@ -72,23 +72,27 @@ class LitUNITEClassifier(L.LightningModule):
         self._test_buffer: list[VisualizationData] = []
 
     @override
-    def forward(self, x):  # pyright: ignore[reportAny, reportUnknownParameterType, reportMissingParameterType]
+    # pyright: ignore[reportAny, reportUnknownParameterType, reportMissingParameterType]
+    def forward(self, x):
         return self.model(x)  # pyright: ignore[reportAny]
 
     @override
-    def on_save_checkpoint(self, checkpoint):  # pyright: ignore[reportMissingParameterType]
+    # pyright: ignore[reportMissingParameterType]
+    def on_save_checkpoint(self, checkpoint):
         """체크포인트 저장 시 Frozen 파라미터(Backbone)를 제외합니다."""
         state_dict = checkpoint["state_dict"]  # pyright: ignore[reportAny]
 
         # 저장하지 않을 키 필터링 (vis_encoder 관련 키들 제거)
         # 키 이름은 모델 구조에 따라 'model.vis_encoder.'로 시작합니다.
-        keys_to_remove = [k for k in state_dict if "model.vis_encoder" in k]  # pyright: ignore[reportAny]
+        # pyright: ignore[reportAny]
+        keys_to_remove = [k for k in state_dict if "model.vis_encoder" in k]
 
         for k in keys_to_remove:  # pyright: ignore[reportAny]
             del state_dict[k]
 
     @override
-    def on_load_checkpoint(self, checkpoint):  # pyright: ignore[reportMissingParameterType]
+    # pyright: ignore[reportMissingParameterType]
+    def on_load_checkpoint(self, checkpoint):
         """로드 시 체크포인트에 없는 백본 가중치를 현재 모델에서 복사해서 채워줌"""
         state_dict = checkpoint["state_dict"]  # pyright: ignore[reportAny]
         model_state_dict = self.state_dict()
@@ -117,7 +121,8 @@ class LitUNITEClassifier(L.LightningModule):
         loss = loss_ce * self.config.loss.lambda_1 + loss_ad * self.config.loss.lambda_2
         c_magnitude = cast(
             'Float[Tensor, ""]',
-            torch.norm(self.ad_loss.C, p=2, dim=-1).mean(),  # pyright: ignore[reportUnknownMemberType]
+            # pyright: ignore[reportUnknownMemberType]
+            torch.norm(self.ad_loss.C, p=2, dim=-1).mean(),
         )
         self.log_dict(
             {
@@ -203,17 +208,33 @@ class LitUNITEClassifier(L.LightningModule):
 
     @override
     def on_test_epoch_end(self):
-        self.test_output = VisualizationData.from_step_output(self._test_buffer)
+        self.test_output = VisualizationData.from_step_output(
+            self._test_buffer)
         self._test_buffer.clear()
 
     @override
     def configure_optimizers(self):
-        optim = torch.optim.AdamW(self.model.parameters(), lr=self.config.optim.lr)
-        scheduler = torch.optim.lr_scheduler.StepLR(
+        optim = torch.optim.AdamW(
+            self.model.parameters(), lr=self.config.optim.lr)
+
+        scheduler_warmup = torch.optim.lr_scheduler.LinearLR(
+            optim,
+            0.001,
+            1,
+            self.config.optim.warmup_steps,
+        )
+        scheduler_step = torch.optim.lr_scheduler.StepLR(
             optim,
             self.config.optim.decay_steps,
             gamma=0.5,
         )
+
+        scheduler = torch.optim.lr_scheduler.SequentialLR(
+            optim,
+            [scheduler_warmup, scheduler_step],
+            [self.config.optim.decay_steps],
+        )
+            
 
         return {
             "optimizer": optim,
