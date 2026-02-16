@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
 import torch
@@ -23,7 +24,7 @@ class BaseProcessor(ABC):
             )
 
     @abstractmethod
-    def get_frame_count(self, path: str) -> int:
+    def get_frame_count(self, path: Path) -> int:
         raise NotImplementedError
 
     @abstractmethod
@@ -36,7 +37,7 @@ class BaseProcessor(ABC):
 
     def getitem(
         self, meta: FileMeta
-    ) -> tuple[Float[Tensor, "channel batch h w"], Int[Tensor, "batch"]]:  # ty:ignore[invalid-method-override]
+    ) -> tuple[Float[Tensor, "channel batch h w"], Int[Tensor, "batch"]]:
         raw_frames_tensor = self._load_frames(meta)
         frames_tensor_resized = cast(
             'Int[Tensor, "batch channel h w"]',
@@ -68,6 +69,6 @@ class BaseProcessor(ABC):
             processed_tensor.permute(1, 0, 2, 3)
         )
 
-        return processed_tensor_out.contiguous(), Tensor(
+        return processed_tensor_out.contiguous(), torch.tensor(
             meta["label"], dtype=torch.long
         )

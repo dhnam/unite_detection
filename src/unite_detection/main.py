@@ -100,7 +100,7 @@ def train(
         v2.ToDtype(torch.float32),
     ]
     transform_list = [x for x in transform_list if x is not None]
-    transform = v2.Compose(transform_list)
+    transform = v2.Compose(transform_list)  # ty:ignore[invalid-argument-type]
 
     config.datamodule.dataset.transform = transform
     datamodule = DFDataModule(config.datamodule)
@@ -124,7 +124,7 @@ def train(
             resume="must",
         )
 
-    callbacks: list[Callback] = [VisualizationCallback(), LearningRateMonitor()]
+    callbacks: list[Callback] = [VisualizationCallback(), LearningRateMonitor()]  # ty:ignore[invalid-assignment]
     if config.use_ckpt and not fast_dev_run:
         callbacks.append(
             ModelCheckpoint(
@@ -146,13 +146,13 @@ def train(
     )
 
     if config.wandb_watch and not fast_dev_run:
-        wandb_logger.watch(lit_classifier)
+        wandb_logger.watch(lit_classifier)  # ty:ignore[invalid-argument-type]
 
     if not resume:
-        trainer.fit(lit_classifier, datamodule=datamodule)
+        trainer.fit(lit_classifier, datamodule=datamodule)  # ty:ignore[invalid-argument-type]
     else:
         ckpt: str = typer.prompt("Input checkpoint path")
-        trainer.fit(lit_classifier, datamodule=datamodule, ckpt_path=ckpt)
+        trainer.fit(lit_classifier, datamodule=datamodule, ckpt_path=ckpt)  # ty:ignore[invalid-argument-type]
 
     wandb.finish()
 
@@ -160,7 +160,7 @@ def train(
 @app.command()
 def test(
     ckpt_path: Annotated[
-        Path, typer.Argument(exitss=True, file_okay=True, dir_okay=False)
+        Path, typer.Argument(exists=True, file_okay=True, dir_okay=False)
     ],
     config_path: Annotated[
         Path, typer.Option(exists=True, file_okay=True, dir_okay=False)
@@ -202,7 +202,7 @@ def test(
             log_model=config.wandb_log_model,
         )
 
-    callbacks: list[Callback] = [VisualizationCallback()]
+    callbacks: list[Callback] = [VisualizationCallback()]  # ty:ignore[invalid-assignment]
 
     trainer = L.Trainer(
         precision="bf16-mixed" if config.lit_unite.unite_model.use_bfloat else 16,

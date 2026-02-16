@@ -25,7 +25,7 @@ class EncoderConfig(BaseModel):
 
 
 class FileMeta(TypedDict):
-    path: str
+    path: Path
     chunk_idx: int
     label: int
     total_frames: int

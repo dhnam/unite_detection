@@ -52,13 +52,13 @@ class DeepFakeBaseDataset(Dataset, ABC):
 
     def _prepare_samples(self, paths: Sequence[Path | str]):
         """상속받는 클래스에서 각자의 방식으로 samples 리스트를 채움"""
-        for path in paths:
-            path_str = Path(path)
-            label = self._get_label(path_str)
+        assert self._samples is not None
+        for path in map(Path, paths):
+            label = self._get_label(path)
             if label is None:
                 continue
 
-            frame_cnt = self.processor.get_frame_count(path_str)
+            frame_cnt = self.processor.get_frame_count(path)
             if frame_cnt <= 0:
                 continue
 
@@ -66,7 +66,7 @@ class DeepFakeBaseDataset(Dataset, ABC):
             for i in range(num_chunks):
                 self._samples.append(
                     {
-                        "path": path_str,
+                        "path": path,
                         "chunk_idx": i,
                         "label": label,
                         "total_frames": frame_cnt,

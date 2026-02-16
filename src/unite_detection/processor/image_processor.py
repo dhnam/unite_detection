@@ -1,6 +1,6 @@
 import math
-import os
 from collections.abc import Callable
+from pathlib import Path
 from typing import override
 
 import torch
@@ -19,10 +19,10 @@ class ImageProcessor(BaseProcessor):
         self.naming_fn = naming_fn
 
     @override
-    def get_frame_count(self, path: str) -> int:
+    def get_frame_count(self, path: Path) -> int:
         try:
             return len(
-                [f for f in os.listdir(path) if f.endswith((".jpg", ".png", ".bmp"))],
+                [f for f in path.iterdir() if f.suffix in (".jpg", ".png", ".bmp")],
             )
         except Exception:
             return 0
@@ -44,11 +44,11 @@ class ImageProcessor(BaseProcessor):
         for i in range(self.config.arch.num_frames):
             current_idx = min(start_frame_idx + i, total_frames - 1)
             file_name = self.naming_fn(current_idx)
-            img_path = os.path.join(folder_path, file_name)
+            img_path = folder_path / file_name
 
             try:
                 img_tensor_raw: Int[Tensor, "channel h w"] = decode_image(
-                    read_file(img_path),
+                    read_file(img_path),  # ty:ignore[invalid-argument-type]
                     mode=ImageReadMode.RGB,
                 )
                 frames_list.append(img_tensor_raw)

@@ -1,4 +1,4 @@
-from typing import override
+from typing import Protocol, TypeGuard, override
 
 import matplotlib.pyplot as plt
 import pytorch_lightning as L
@@ -12,6 +12,11 @@ from unite_detection.utils.plots import (
     plot_tsne,
 )
 
+class VisualizableLitModule(Protocol)
+
+def is_visualizable[T](module: T) -> TypeGuard[Visualizable]:
+    return isinstance(module, Visualizable)
+
 
 class VisualizationCallback(L.Callback):
     def _visualize_all(
@@ -20,7 +25,8 @@ class VisualizationCallback(L.Callback):
         data: VisualizationData,
         stage: str,
     ):
-        assert isinstance(pl_module, Visualizable)
+        if not is_visualizable(pl_module):
+            raise TypeError(f"{type(pl_module)=} is not Visualizable")
         ctx = PlotContext(
             class_names=pl_module.class_names,
             stage=stage,

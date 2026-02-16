@@ -1,4 +1,5 @@
 import math
+from pathlib import Path
 from typing import override
 
 import cv2
@@ -13,7 +14,7 @@ from .base_processor import BaseProcessor
 
 class VideoProcessor(BaseProcessor):
     @override
-    def get_frame_count(self, path: str) -> int:
+    def get_frame_count(self, path: Path) -> int:
         cap = cv2.VideoCapture(path)
         cnt = 0
         if cap.isOpened():

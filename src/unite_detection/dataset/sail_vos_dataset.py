@@ -1,6 +1,6 @@
 from collections.abc import Sequence
 from pathlib import Path
-from typing import overload
+from typing import override
 
 from unite_detection.processor import ImageProcessor
 from unite_detection.schemas import DatasetConfig
@@ -19,12 +19,13 @@ class SailVosDataset(DeepFakeBaseDataset):
 
         self.ext = ext
 
-    @overload
+    @override
     def _create_processor(self):
         return ImageProcessor(self.config, self.idx_to_filename)
 
     def idx_to_filename(self, idx: int) -> str:
         return f"{idx:06d}{self.ext}"
 
-    def _get_label(self, path: str) -> int | None:
+    @override
+    def _get_label(self, path: Path) -> int | None:
         return 1
