@@ -32,7 +32,11 @@ app = typer.Typer(no_args_is_help=True)
 
 
 @app.command(short_help="Initialize config yaml file. Will override current file.")
-def init_yaml(path: Path = Path("./example.yaml")):
+def init_yaml(
+    path: Annotated[
+        Path, typer.Option(exists=False, file_okay=True, dir_okay=False)
+    ] = Path("./example.yaml"),
+):
     default_config = TrainConfig()
     model_dict = default_config.model_dump(
         exclude={"datamodule": {"dataset": {"arch", "encoder"}}, "lit_unite": {"arch"}},
@@ -45,9 +49,9 @@ def init_yaml(path: Path = Path("./example.yaml")):
 
 @app.command(short_help="Train UNITE model using given yaml file.")
 def train(
-    config_path: Annotated[Path, typer.Option(exists=True, file_okay=True)] = Path(
-        "./example.yaml"
-    ),
+    config_path: Annotated[
+        Path, typer.Option(exists=True, file_okay=True, dir_okay=False)
+    ] = Path("./example.yaml"),
     resume: bool = False,
     run_name: str | None = None,
     fast_dev_run: Annotated[bool, typer.Option("--fast-dev-run")] = False,
@@ -155,10 +159,12 @@ def train(
 
 @app.command()
 def test(
-    ckpt_path: Annotated[Path, typer.Argument(exitss=True, file_okay=True)],
-    config_path: Annotated[Path, typer.Option(exists=True, file_okay=True)] = Path(
-        "./example.yaml"
-    ),
+    ckpt_path: Annotated[
+        Path, typer.Argument(exitss=True, file_okay=True, dir_okay=False)
+    ],
+    config_path: Annotated[
+        Path, typer.Option(exists=True, file_okay=True, dir_okay=False)
+    ] = Path("./example.yaml"),
     run_id: Annotated[
         str | None,
         typer.Option(
@@ -181,7 +187,7 @@ def test(
         torch.set_float32_matmul_precision("high")
 
     datamodule = DFDataModule(config.datamodule)
-    lit_classifier = LitUNITEClassifier(config.lit_unite)
+    lit_classifier = LitUNITEClassifier.load_from_checkpoint(ckpt_path)
     wandb_logger: WandbLogger
     if run_id:
         wandb_logger = WandbLogger(
@@ -195,7 +201,7 @@ def test(
             project=config.project_name,
             log_model=config.wandb_log_model,
         )
-    
+
     callbacks: list[Callback] = [VisualizationCallback()]
 
     trainer = L.Trainer(
@@ -204,16 +210,21 @@ def test(
         callbacks=callbacks,
     )
 
-    trainer.test(lit_classifier, datamodule=datamodule, ckpt_path=ckpt_path)
+    trainer.test(lit_classifier, datamodule=datamodule)
     wandb.finish()
+
 
 @app.command(short_help="Predict with given video directory.")
 def predict(
-    ckpt_path: Annotated[Path, typer.Argument(exists=True, file_okay=True)],
-    input_dir: Annotated[Path, typer.Argument(exists=True, dir_okay=True)],
-    config_path: Annotated[Path, typer.Option(exists=True, file_okay=True)] = Path(
-        "./example.yaml"
-    ),
+    ckpt_path: Annotated[
+        Path, typer.Argument(exists=True, file_okay=True, dir_okay=False)
+    ],
+    input_dir: Annotated[
+        Path, typer.Argument(exists=True, file_okay=False, dir_okay=True)
+    ],
+    config_path: Annotated[
+        Path, typer.Option(exists=True, file_okay=True, dir_okay=False)
+    ] = Path("./example.yaml"),
 ):
     model_dict: dict
     with open(config_path) as f:
@@ -227,13 +238,27 @@ def predict(
         config.datamodule.loader.batch_size,
     )
 
-    lit_classifier = LitUNITEClassifier(config.lit_unite)
+    lit_classifier = LitUNITEClassifier.load_from_checkpoint(ckpt_path)
     trainer = L.Trainer(
         precision="bf16-mixed" if config.lit_unite.unite_model.use_bfloat else 16,
         num_sanity_val_steps=0,
     )
 
     print(trainer.predict(lit_classifier, loader))
+
+
+@app.command(short_help="Export to ONNX file")
+def export(
+    ckpt_path: Annotated[
+        Path, typer.Argument(exists=True, file_okay=True, dir_okay=False)
+    ],
+    onnx_path: Annotated[
+        Path, typer.Argument(exists=False, file_okay=True, dir_okay=False)
+    ],
+):
+    lit_classifier = LitUNITEClassifier.load_from_checkpoint(ckpt_path)
+    lit_classifier.to_onnx(onnx_path, export_params=True)
+
 
 if __name__ == "__main__":
     app()

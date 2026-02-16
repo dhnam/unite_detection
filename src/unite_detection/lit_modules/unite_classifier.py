@@ -71,6 +71,16 @@ class LitUNITEClassifier(L.LightningModule):
         self._val_buffer: list[VisualizationData] = []
         self._test_buffer: list[VisualizationData] = []
 
+        self.example_input_array: Float[Torch, "batch channel frame h w"] = torch.randn(
+            (
+                2,
+                3,
+                self.config.arch.num_frames,
+                self.config.arch.img_size,
+                self.config.arch.img_size,
+            )
+        )
+
     @override
     # pyright: ignore[reportAny, reportUnknownParameterType, reportMissingParameterType]
     def forward(self, x):
@@ -113,8 +123,9 @@ class LitUNITEClassifier(L.LightningModule):
         x, y = batch
         logit, P, _ = cast("UNITEOutput", self.model(x, return_ad_param=True))
         assert P is not None
+        type loss_val = Float[Tensor, ""]
         loss_ad, within, between, head_dist_mean = cast(
-            'tuple[Float[Tensor, ""], Float[Tensor, ""], Float[Tensor, ""], Float[Tensor, ""]]',
+            'tuple[loss_val, loss_val, loss_val, loss_val]',
             self.ad_loss(P, y, log_detail=True),
         )
         loss_ce = cast('Float[Tensor, ""]', self.ce_loss(logit, y))
