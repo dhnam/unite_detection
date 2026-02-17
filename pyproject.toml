@@ -13,6 +13,7 @@ dependencies = [
     "kagglehub>=1.0.0",
     "matplotlib>=3.10.8",
     "matplotlib-inline>=0.2.1",
+    "onnx>=1.20.1",
     "opencv-python>=4.13.0.92",
     "pandas>=3.0.0",
     "pandas-stubs>=3.0.0.260204",
