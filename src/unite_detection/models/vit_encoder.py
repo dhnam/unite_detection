@@ -4,7 +4,7 @@ from typing import Literal, cast, overload, override
 
 import torch.nn.functional as F
 from jaxtyping import Float
-from torch import Tensor, onnx, nn
+from torch import Tensor, nn, onnx
 
 
 def _check_flash_attn() -> bool:

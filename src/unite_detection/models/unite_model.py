@@ -22,7 +22,7 @@ class UNITE(nn.Module):
             self.config.encoder.model,
             device_map="auto",
             dtype=dtype,
-            attn_implementation="flash_attention_2",
+            attn_implementation="sdpa",
         )
         self.embed_size = self.vis_encoder.config.vision_config.hidden_size
         processor = AutoProcessor.from_pretrained(
