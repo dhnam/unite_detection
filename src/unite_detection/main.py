@@ -1,4 +1,4 @@
-from pathlib import Path
+from pathlib import Path, PosixPath
 from typing import Annotated
 
 import kagglehub
@@ -187,7 +187,7 @@ def test(
         torch.set_float32_matmul_precision("high")
 
     datamodule = DFDataModule(config.datamodule)
-    torch.serialization.add_safe_globals([Path])
+    torch.serialization.add_safe_globals([PosixPath])
     lit_classifier = LitUNITEClassifier.load_from_checkpoint(ckpt_path)
     wandb_logger: WandbLogger
     if run_id:
@@ -238,7 +238,7 @@ def predict(
         predict_dataset,
         config.datamodule.loader.batch_size,
     )
-    torch.serialization.add_safe_globals([Path])
+    torch.serialization.add_safe_globals([PosixPath])
     lit_classifier = LitUNITEClassifier.load_from_checkpoint(ckpt_path)
     trainer = L.Trainer(
         precision="bf16-mixed" if config.lit_unite.unite_model.use_bfloat else 16,
