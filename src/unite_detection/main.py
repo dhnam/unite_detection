@@ -157,7 +157,7 @@ def train(
     wandb.finish()
 
 
-@app.command()
+@app.command(short_help="Test the model using test dataset")
 def test(
     ckpt_path: Annotated[
         Path, typer.Argument(exists=True, file_okay=True, dir_okay=False)
@@ -187,6 +187,7 @@ def test(
         torch.set_float32_matmul_precision("high")
 
     datamodule = DFDataModule(config.datamodule)
+    torch.serialization.add_safe_globals([pathlib.PosixPath])
     lit_classifier = LitUNITEClassifier.load_from_checkpoint(ckpt_path)
     wandb_logger: WandbLogger
     if run_id:
@@ -237,7 +238,7 @@ def predict(
         predict_dataset,
         config.datamodule.loader.batch_size,
     )
-
+    torch.serialization.add_safe_globals([pathlib.PosixPath])
     lit_classifier = LitUNITEClassifier.load_from_checkpoint(ckpt_path)
     trainer = L.Trainer(
         precision="bf16-mixed" if config.lit_unite.unite_model.use_bfloat else 16,
