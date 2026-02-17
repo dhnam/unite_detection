@@ -187,7 +187,7 @@ def test(
         torch.set_float32_matmul_precision("high")
 
     datamodule = DFDataModule(config.datamodule)
-    torch.serialization.add_safe_globals([pathlib.PosixPath])
+    torch.serialization.add_safe_globals([Path])
     lit_classifier = LitUNITEClassifier.load_from_checkpoint(ckpt_path)
     wandb_logger: WandbLogger
     if run_id:
