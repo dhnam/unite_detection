@@ -152,7 +152,7 @@ class UNITE(nn.Module):
             P = P_reshape.mean(dim=(3, 4))
         else:
             transformer_out: Float[Tensor, "batch tot_w_cls embed"] = (
-                self.first_encoder(x)
+                self.first_encoder(transform_in)
             )
 
         for encoder in self.encoders:
