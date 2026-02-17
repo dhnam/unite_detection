@@ -15,7 +15,7 @@ class UNITE(nn.Module):
     def __init__(self, config: UNITEConfig | None = None):
         super().__init__()
 
-        self.config = config or UNITEConfig
+        self.config = config or UNITEConfig()
 
         dtype = torch.bfloat16 if self.config.use_bfloat else torch.float16
         self.vis_encoder = AutoModel.from_pretrained(
