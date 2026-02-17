@@ -152,8 +152,12 @@ class VisualizationData(BaseModel):
             logits=torch.cat([x.logits for x in output], dim=0),
             labels=torch.cat([x.labels for x in output], dim=0),
             embeds=torch.cat([x.embeds for x in output], dim=0),
-            ps=torch.cat([x.ps for x in output if x.ps is not None], dim=0),
-            cs=torch.cat([x.cs for x in output if x.cs is not None], dim=0),
+            ps=torch.cat([x.ps for x in output], dim=0)
+            if output.ps is not None
+            else None,
+            cs=torch.cat([x.cs for x in output], dim=0)
+            if output.cs is not None
+            else None,
         )
 
 
