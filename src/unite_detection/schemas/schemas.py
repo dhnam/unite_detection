@@ -148,16 +148,15 @@ class VisualizationData(BaseModel):
                 embeds=torch.empty(0),
             )
 
+        total_ps = [x.ps for x in output if x.ps is not None]
+        total_cs = [x.cs for x in output if x.cs is not None]
+
         return cls(
             logits=torch.cat([x.logits for x in output], dim=0),
             labels=torch.cat([x.labels for x in output], dim=0),
             embeds=torch.cat([x.embeds for x in output], dim=0),
-            ps=torch.cat([x.ps for x in output], dim=0)
-            if output.ps is not None
-            else None,
-            cs=torch.cat([x.cs for x in output], dim=0)
-            if output.cs is not None
-            else None,
+            ps=torch.cat(total_ps, dim=0) if len(total_ps) > 0 else None,
+            cs=torch.cat(total_cs, dim=0) if len(total_cs) > 0 else None,
         )
 
 
