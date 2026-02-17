@@ -238,7 +238,7 @@ def predict(
         predict_dataset,
         config.datamodule.loader.batch_size,
     )
-    torch.serialization.add_safe_globals([pathlib.PosixPath])
+    torch.serialization.add_safe_globals([Path])
     lit_classifier = LitUNITEClassifier.load_from_checkpoint(ckpt_path)
     trainer = L.Trainer(
         precision="bf16-mixed" if config.lit_unite.unite_model.use_bfloat else 16,
