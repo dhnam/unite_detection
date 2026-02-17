@@ -171,6 +171,7 @@ def test(
             prompt="Input run id to log (or leave it blank)", show_default=False
         ),
     ] = "",
+    fast_dev_run: Annotated[bool, typer.Option("--fast-dev-run")] = False,
 ):
     run_id = run_id if run_id != "" else None
 
@@ -209,6 +210,7 @@ def test(
         precision="bf16-mixed" if config.lit_unite.unite_model.use_bfloat else 16,
         logger=wandb_logger,
         callbacks=callbacks,
+        fast_dev_run=fast_dev_run,
     )
 
     trainer.test(lit_classifier, datamodule=datamodule)
@@ -226,6 +228,7 @@ def predict(
     config_path: Annotated[
         Path, typer.Option(exists=True, file_okay=True, dir_okay=False)
     ] = Path("./example.yaml"),
+    fast_dev_run: Annotated[bool, typer.Option("--fast-dev-run")] = False,
 ):
     model_dict: dict
     with open(config_path) as f:
@@ -243,6 +246,7 @@ def predict(
     trainer = L.Trainer(
         precision="bf16-mixed" if config.lit_unite.unite_model.use_bfloat else 16,
         num_sanity_val_steps=0,
+        fast_dev_run=fast_dev_run,
     )
 
     print(trainer.predict(lit_classifier, loader))
