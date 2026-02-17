@@ -261,6 +261,7 @@ def export(
         Path, typer.Argument(exists=False, file_okay=True, dir_okay=False)
     ],
 ):
+    torch.serialization.add_safe_globals([PosixPath])
     lit_classifier = LitUNITEClassifier.load_from_checkpoint(ckpt_path)
     lit_classifier.to_onnx(onnx_path, export_params=True)
 
