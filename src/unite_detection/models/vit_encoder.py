@@ -4,7 +4,7 @@ from typing import Literal, cast, overload, override
 
 import torch.nn.functional as F
 from jaxtyping import Float
-from torch import Tensor, nn
+from torch import Tensor, onnx, nn
 
 
 def _check_flash_attn() -> bool:
@@ -101,7 +101,7 @@ class ViTEncoder(nn.Module):
 
         # Apply scaled dot product attention
         # dropout_p는 훈련 중일 때만 적용
-        if HAS_FLASH_ATTN and q.is_cuda:
+        if HAS_FLASH_ATTN and q.is_cuda and not onnx.is_in_onnx_export():
             assert flash_attn_func is not None
             attn_output_raw = cast(
                 'Float[Tensor, "b l h d"]',
