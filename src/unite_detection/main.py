@@ -1,3 +1,4 @@
+from enum import Enum
 from pathlib import Path, PosixPath
 from typing import Annotated
 
@@ -251,6 +252,10 @@ def predict(
 
     print(trainer.predict(lit_classifier, loader))
 
+class Precision(Enum):
+    bfloat = "bfloat"
+    float16 = "float16"
+    float32 = "float32"
 
 @app.command(short_help="Export to ONNX file")
 def export(
@@ -260,9 +265,14 @@ def export(
     onnx_path: Annotated[
         Path, typer.Argument(exists=False, file_okay=True, dir_okay=False)
     ],
+    precision: Precision = Precision.bfloat
 ):
     torch.serialization.add_safe_globals([PosixPath])
     lit_classifier = LitUNITEClassifier.load_from_checkpoint(ckpt_path)
+    if precision == Precision.float16:
+        lit_classifier = lit_classifier.half()
+    if precision == Precision.float32:
+        lit_classifier = lit_classifier.float()
     lit_classifier.to_onnx(onnx_path, export_params=True)
 
 
