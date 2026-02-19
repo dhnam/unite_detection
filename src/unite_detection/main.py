@@ -56,11 +56,13 @@ def train(
     resume: bool = False,
     run_name: str | None = None,
     fast_dev_run: Annotated[bool, typer.Option("--fast-dev-run")] = False,
+    use_kagglehub_login: bool = False,
 ):
 
     print("Logging into wandb and kaggle...")
     wandb.login()
-    kagglehub.login()
+    if use_kagglehub_login:
+        kagglehub.login()
 
     model_dict: dict
     with open(config_path) as f:
@@ -173,12 +175,14 @@ def test(
         ),
     ] = "",
     fast_dev_run: Annotated[bool, typer.Option("--fast-dev-run")] = False,
+    use_kagglehub_login: bool = False
 ):
     run_id = run_id if run_id != "" else None
 
     print("Logging into wandb and kaggle...")
     wandb.login()
-    kagglehub.login()
+    if use_kagglehub_login:
+        kagglehub.login()
 
     model_dict: dict
     with open(config_path) as f:
