@@ -41,7 +41,7 @@ conflicts = [
 
 [project.optional-dependencies]
 gpu = ["lightning>=2.6.1", "transformers[accelerate,sentencepiece]>=5.1.0", "torch==2.9.1", "torchvision==0.24.1", "flash-attn"]
-gpu_no_flash_attn = ["lightning>=2.6.1", "transformers[accelerate,sentencepiece]>=5.1.0", "torch>=2.9.0", "torchvision>=0.24.0"]
+gpu-no-flash-attn = ["lightning>=2.6.1", "transformers[accelerate,sentencepiece]>=5.1.0", "torch>=2.9.0", "torchvision>=0.24.0"]
 cpu = [
     "lightning>=2.6.1",
     "transformers[accelerate,sentencepiece]>=5.1.0",
