@@ -57,12 +57,12 @@ flash-attn = ["torch~=2.9.0"]
 [tool.uv.sources]
 torch = [
   { index = "pytorch-cu128", extra = "gpu" },
-  { index = "pytorch-cu128", extra = "gpu_not_flash_attn" },
+  { index = "pytorch-cu128", extra = "gpu_no_flash_attn" },
   { index = "pytorch-cpu", extra = "cpu" }
 ]
 torchvision = [
   { index = "pytorch-cu128", extra = "gpu" },
-  { index = "pytorch-cu128", extra = "gpu_not_flash_attn" },
+  { index = "pytorch-cu128", extra = "gpu_no_flash_attn" },
   { index = "pytorch-cpu", extra = "cpu" }
 ]
 
