@@ -11,7 +11,7 @@ from unite_detection.processor import BaseProcessor
 from unite_detection.schemas import DatasetConfig, FileMeta
 
 
-class DeepFakeBaseDataset(Dataset, ABC):
+class DeepFakeBaseDataset(Dataset[tuple[Tensor, Tensor]], ABC):
     def __init__(
         self,
         paths: Sequence[Path | str],
