@@ -190,3 +190,45 @@ class GTAManager(AbstractDatasetManager):
         print(f"Train: {len(train_vid)}")
         print(f"Val: {len(val_vid)}")
         print(f"Test: {len(test_vid)}")
+
+
+class FFManager(AbstractDatasetManager):
+    @override
+    def _prepare_files(self):
+        path = kagglehub.dataset_download("xdxd003/ff-c23")
+        self.root = Path(path)
+
+    @override
+    def _get_splits(self):
+        all_paths = [
+            Path(x)
+            for x in self.root.glob("*/*.mp4")
+            if os.path.isdir(x) or x.suffix == ".mp4"
+        ]
+        train_vid, val_test_vid = cast(
+            "tuple[list[Path], list[Path]]",
+            train_test_split(
+                all_paths,
+                test_size=0.2,
+                random_state=42,
+                shuffle=True,
+            ),
+        )
+
+        val_vid, test_vid = cast(
+            "tuple[list[Path], list[Path]]",
+            train_test_split(
+                val_test_vid,
+                test_size=0.5,
+                random_state=42,
+                shuffle=True,
+            ),
+        )
+
+        self.train_paths = train_vid
+        self.val_paths = val_vid
+        self.test_paths = test_vid
+        print("FF Videos")
+        print(f"Train: {len(train_vid)}")
+        print(f"Val: {len(val_vid)}")
+        print(f"Test: {len(test_vid)}")

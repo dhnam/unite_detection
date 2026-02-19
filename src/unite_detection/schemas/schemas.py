@@ -103,9 +103,11 @@ class DataLoaderConfig(BaseModel):
 
 
 class SamplerConfig(BaseModel):
-    real_weight: float = 0.4
-    fake_weight: float = 0.35
-    gta_weight: float = 0.25
+    real_weight: float = 0.2
+    ff_real_weight: float = 0.2
+    fake_weight: float = 0.225
+    gta_weight: float = 0.15
+    ff_fake_weight: float = 0.225
     seed: int | None = None
     run_sample: int = 20000
 
@@ -119,6 +121,7 @@ class DataModuleConfig(BaseModel):
     gta_v_zip_path: Path = Path("./mini-ref-sailvos.zip")
     gta_v_down_path: Path = Path("./gta_v")
     gta_v_gdrive_id: str = "1-0Vu4X-pqb4Da226g1OALHytAlMRCC84"
+    use_ff: bool = True
     do_preprocess: bool = False
     loader: DataLoaderConfig = Field(default_factory=DataLoaderConfig)
     dataset: DatasetConfig = Field(default_factory=DatasetConfig)

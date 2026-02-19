@@ -4,8 +4,12 @@ import lightning.pytorch as L
 import torch
 from torch.utils.data import ConcatDataset, DataLoader, Dataset, WeightedRandomSampler
 
-from unite_detection.dataset import CelebDFBaseDataset, SailVosDataset
-from unite_detection.lit_modules.dataset_manager import CelebDFManager, GTAManager
+from unite_detection.dataset import CelebDFBaseDataset, FFDataset, SailVosDataset
+from unite_detection.lit_modules.dataset_manager import (
+    CelebDFManager,
+    FFManager,
+    GTAManager,
+)
 from unite_detection.schemas import DataModuleConfig, DatasetConfig, SamplerConfig
 
 
@@ -17,6 +21,7 @@ class SamplerFactory:
         self,
         celeb_train: CelebDFBaseDataset,
         gta_train: SailVosDataset | None = None,
+        ff_train: FFDataset | None = None,
     ) -> WeightedRandomSampler:
         celeb_counts = celeb_train.get_label_counter()
         celeb_weights = (
@@ -30,6 +35,15 @@ class SamplerFactory:
             gta_counts = gta_train.get_label_counter()
             gta_weight = self.config.gta_weight / gta_counts[1]
             sample_weights.extend([gta_weight] * len(gta_train))
+        if ff_train is not None:
+            ff_counts = ff_train.get_label_counter()
+            ff_weights = (
+                self.config.ff_real_weight / ff_counts[0],
+                self.config.ff_fake_weight / ff_counts[1],
+            )
+            sample_weights.extend(
+                [ff_weights[sample["label"]] for sample in ff_train.samples]
+            )
 
         gen = None
         if self.config.seed is not None:
@@ -54,6 +68,7 @@ class DFDataModule(L.LightningDataModule):
         self.save_hyperparameters(self.config.model_dump())
         self.celeb_manager = CelebDFManager(self.config)
         self.gta_manager = GTAManager(self.config)
+        self.ff_manager = FFManager(self.config)
         self.sampler_factory = SamplerFactory(self.config.sampler)
 
         class LoaderParam(TypedDict):
@@ -105,6 +120,15 @@ class DFDataModule(L.LightningDataModule):
                 val_config,
                 self.gta_manager.ext,
             )
+        if self.config.use_ff:
+            self.ff_train = FFDataset(
+                self.ff_manager.train_paths,
+                train_config,
+            )
+            self.ff_val = FFDataset(
+                self.ff_manager.val_path,
+                self.val_config,
+            )
 
     def _setup_test_data(self, test_config: DatasetConfig) -> None:
         self.celeb_test = self.celeb_manager.dataset_cls(
@@ -117,16 +141,25 @@ class DFDataModule(L.LightningDataModule):
                 test_config,
                 self.gta_manager.ext,
             )
+        if self.config.use_ff:
+            self.ff_test = FFDataset(
+                self.ff_manager.test_paths,
+                test_config,
+            )
 
     @override
     def train_dataloader(self):
         # 2. 현재 훈련 셋(Subset) 내의 클래스별 개수 계산
         gta = None
+        ff = None
         dataset: Dataset = self.celeb_train
         if self.config.use_gta_v:
             gta = self.gta_train
             dataset = ConcatDataset([dataset, self.gta_train])
-        sampler = self.sampler_factory.create_sampler(self.celeb_train, gta)
+        if self.config.use_ff:
+            ff = self.ff_train
+            dataset = ConcatDataset([dataset, self.ff_train])
+        sampler = self.sampler_factory.create_sampler(self.celeb_train, gta, ff)
         return DataLoader(
             dataset,
             **self.config.loader.model_dump(),
@@ -138,6 +171,8 @@ class DFDataModule(L.LightningDataModule):
         dataset: Dataset = self.celeb_val
         if self.config.use_gta_v:
             dataset = ConcatDataset([dataset, self.gta_val])
+        if self.config.use_ff:
+            dataset = ConcatDataset([dataset, self.ff_val])
         return DataLoader(
             dataset,
             **self.config.loader.model_dump(),
@@ -148,6 +183,8 @@ class DFDataModule(L.LightningDataModule):
         dataset: Dataset = self.celeb_test
         if self.config.use_gta_v:
             dataset = ConcatDataset([dataset, self.gta_test])
+        if self.config.use_ff:
+            dataset = ConcatDataset([dataset, self.ff_test])
         return DataLoader(
             dataset,
             **self.config.loader.model_dump(),
