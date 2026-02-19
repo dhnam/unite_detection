@@ -196,7 +196,7 @@ class FFManager(AbstractDatasetManager):
     @override
     def _prepare_files(self):
         path = kagglehub.dataset_download("xdxd003/ff-c23")
-        self.root = Path(path)
+        self.root = Path(path) / "FaceForensics++_C23"
 
     @override
     def _get_splits(self):
