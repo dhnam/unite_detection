@@ -126,7 +126,7 @@ class DFDataModule(L.LightningDataModule):
                 train_config,
             )
             self.ff_val = FFDataset(
-                self.ff_manager.val_path,
+                self.ff_manager.val_paths,
                 self.val_config,
             )
 
