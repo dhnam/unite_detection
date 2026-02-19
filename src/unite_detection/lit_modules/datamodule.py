@@ -83,6 +83,8 @@ class DFDataModule(L.LightningDataModule):
         self.celeb_manager.prepare()
         if self.config.use_gta_v:
             self.gta_manager.prepare()
+        if self.config.use_ff:
+            self.ff_manager.prepare()
 
     @override
     def setup(self, stage: str | None = None):
