@@ -36,6 +36,7 @@ conflicts = [
   [
     { extra = "cpu" },
     { extra = "gpu" },
+    { extra = "gpu-no-flash-attn" },
   ]
 ]
 
