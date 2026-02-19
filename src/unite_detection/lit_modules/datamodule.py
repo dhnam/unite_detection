@@ -127,7 +127,7 @@ class DFDataModule(L.LightningDataModule):
             )
             self.ff_val = FFDataset(
                 self.ff_manager.val_paths,
-                self.val_config,
+                val_config,
             )
 
     def _setup_test_data(self, test_config: DatasetConfig) -> None:
