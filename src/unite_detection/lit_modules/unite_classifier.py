@@ -23,7 +23,7 @@ from unite_detection.schemas import (
     VisualizationData,
 )
 
-
+type loss_val = Float[Tensor, ""]
 class LitUNITEClassifier(L.LightningModule):
     def __init__(self, config: UNITEClassifierConfig | None = None):
         super().__init__()
@@ -125,7 +125,6 @@ class LitUNITEClassifier(L.LightningModule):
         x, y = batch
         logit, P, _ = cast("UNITEOutput", self.model(x, return_ad_param=True))
         assert P is not None
-        type loss_val = Float[Tensor, ""]
         loss_ad, within, between, head_dist_mean = cast(
             "tuple[loss_val, loss_val, loss_val, loss_val]",
             self.ad_loss(P, y, log_detail=True),

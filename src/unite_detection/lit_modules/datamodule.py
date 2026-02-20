@@ -71,12 +71,6 @@ class DFDataModule(L.LightningDataModule):
         self.ff_manager = FFManager(self.config)
         self.sampler_factory = SamplerFactory(self.config.sampler)
 
-        class LoaderParam(TypedDict):
-            batch_size: int
-            num_workers: int
-            pin_memory: bool
-            persistent_workers: bool
-            prefetch_factor: int | None
 
     @override
     def prepare_data(self):

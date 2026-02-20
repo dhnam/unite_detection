@@ -1,7 +1,8 @@
 from typing import Any, Protocol, TypeGuard, override, runtime_checkable
 
 import matplotlib.pyplot as plt
-import pytorch_lightning as L
+import lightning.pytorch as L
+from lightning.pytorch.loggers import Logger
 import wandb
 
 from unite_detection.schemas import PlotContext, Visualizable, VisualizationData
@@ -19,7 +20,8 @@ class TrainContext(Protocol):
     def current_epoch(self) -> int: ...
 
     @property
-    def logger(self) -> L.logging.Logger: ...
+    def logger(self) -> Logger: ...
+
 
 @runtime_checkable
 class VisualizableLitModule(Visualizable, TrainContext, Protocol):
