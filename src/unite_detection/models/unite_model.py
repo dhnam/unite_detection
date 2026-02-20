@@ -2,7 +2,7 @@ from typing import cast
 
 import torch
 from jaxtyping import Float, Int
-from torch import Tensor, nn
+from torch import Tensor, nn, onnx
 from transformers import AutoModel, AutoProcessor
 
 from unite_detection.models.positional_encoding import TemporalPositionalEncoding
@@ -18,11 +18,15 @@ class UNITE(nn.Module):
         self.config = config or UNITEConfig()
 
         dtype = torch.bfloat16 if self.config.use_bfloat else torch.float16
+        if onnx.is_in_onnx_export():
+            impl = "sdpa"
+        else:
+            impl = "flash_attention_2"
         self.vis_encoder = AutoModel.from_pretrained(
             self.config.encoder.model,
             device_map="auto",
             dtype=dtype,
-            attn_implementation="sdpa",
+            attn_implementation=impl,
         )
         self.embed_size = self.vis_encoder.config.vision_config.hidden_size
         processor = AutoProcessor.from_pretrained(
