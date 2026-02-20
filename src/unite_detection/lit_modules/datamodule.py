@@ -1,7 +1,8 @@
-from typing import TypedDict, override
+from typing import override
 
 import lightning.pytorch as L
 import torch
+from torch import Tensor
 from torch.utils.data import ConcatDataset, DataLoader, Dataset, WeightedRandomSampler
 
 from unite_detection.dataset import CelebDFBaseDataset, FFDataset, SailVosDataset
@@ -148,7 +149,7 @@ class DFDataModule(L.LightningDataModule):
         # 2. 현재 훈련 셋(Subset) 내의 클래스별 개수 계산
         gta = None
         ff = None
-        dataset: Dataset = self.celeb_train
+        dataset: Dataset[tuple[Tensor, Tensor]] = self.celeb_train
         if self.config.use_gta_v:
             gta = self.gta_train
             dataset = ConcatDataset([dataset, self.gta_train])
@@ -164,7 +165,7 @@ class DFDataModule(L.LightningDataModule):
 
     @override
     def val_dataloader(self):
-        dataset: Dataset = self.celeb_val
+        dataset: Dataset[tuple[Tensor, Tensor]] = self.celeb_val
         if self.config.use_gta_v:
             dataset = ConcatDataset([dataset, self.gta_val])
         if self.config.use_ff:
@@ -176,7 +177,7 @@ class DFDataModule(L.LightningDataModule):
 
     @override
     def test_dataloader(self):
-        dataset: Dataset = self.celeb_test
+        dataset: Dataset[tuple[Tensor, Tensor]] = self.celeb_test
         if self.config.use_gta_v:
             dataset = ConcatDataset([dataset, self.gta_test])
         if self.config.use_ff:
