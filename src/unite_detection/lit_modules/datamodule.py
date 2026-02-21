@@ -173,6 +173,7 @@ class DFDataModule(L.LightningDataModule):
         return DataLoader(
             dataset,
             **self.config.loader.model_dump(),
+            shuffle=True,
         )
 
     @override
