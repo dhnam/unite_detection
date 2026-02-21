@@ -4,6 +4,7 @@ from collections.abc import Callable, Sequence
 from pathlib import Path
 from typing import (
     TYPE_CHECKING,
+    Annotated,
     Literal,
     NamedTuple,
     Protocol,
@@ -89,7 +90,7 @@ class UNITEClassifierConfig(BaseModel):
 
 class DatasetConfig(BaseModel):
     video_decode_device: str = "cpu"
-    transform: Callable | None = Field(None, exclude=True)
+    transform: Annotated[Callable | None, Field(None, exclude=True)] = None
     arch: ArchSchema = Field(default_factory=ArchSchema)
     encoder: EncoderConfig = Field(default_factory=EncoderConfig)
 

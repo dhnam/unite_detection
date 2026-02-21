@@ -156,6 +156,7 @@ def train(
         trainer.fit(lit_classifier, datamodule=datamodule)  # ty:ignore[invalid-argument-type]
     else:
         ckpt: str = typer.prompt("Input checkpoint path")
+        torch.serialization.add_safe_globals([PosixPath])
         trainer.fit(lit_classifier, datamodule=datamodule, ckpt_path=ckpt)  # ty:ignore[invalid-argument-type]
 
     wandb.finish()
