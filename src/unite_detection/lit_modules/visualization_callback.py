@@ -55,8 +55,9 @@ class VisualizationCallback(L.Callback):
         plt.close(fig_cm)
 
         fig_tsne = plot_tsne(data, ctx, max_samples=20000)
-        log_dict[f"{stage}/t_sne"] = wandb.Image(fig_tsne)
-        plt.close(fig_tsne)
+        if fig_tsne is not None:
+            log_dict[f"{stage}/t_sne"] = wandb.Image(fig_tsne)
+            plt.close(fig_tsne)
 
         if not (
             data.ps is None
@@ -65,8 +66,9 @@ class VisualizationCallback(L.Callback):
             or data.cs.size(0) == 0
         ):
             fig_enc_tsne = plot_encoder_tsne(data, ctx, max_samples=400)
-            log_dict[f"{stage}/P_C_tsne_plot"] = wandb.Image(fig_enc_tsne)
-            plt.close(fig_enc_tsne)
+            if fig_enc_tsne is not None:
+                log_dict[f"{stage}/P_C_tsne_plot"] = wandb.Image(fig_enc_tsne)
+                plt.close(fig_enc_tsne)
 
         if pl_module.logger:
             pl_module.logger.experiment.log(log_dict)  # ty:ignore[unresolved-attribute]
