@@ -190,6 +190,7 @@ class TrainConfig(BaseModel):
     wandb_log_model: bool | Literal["all"] = False
     max_epoch: int = 20
     acc_grad: int = 2
+    limit_val_batches: float = 1
     arch: ArchSchema = Field(default_factory=ArchSchema)
     encoder: EncoderConfig = Field(default_factory=EncoderConfig)
     datamodule: DataModuleConfig = Field(default_factory=DataModuleConfig)
