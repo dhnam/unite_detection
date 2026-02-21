@@ -146,6 +146,7 @@ def train(
         num_sanity_val_steps=0,
         accumulate_grad_batches=config.acc_grad,
         fast_dev_run=fast_dev_run,
+        limit_val_batches=config.limit_val_batches,
     )
 
     if config.wandb_watch and not fast_dev_run:
@@ -252,7 +253,6 @@ def predict(
         precision="bf16-mixed" if config.lit_unite.unite_model.use_bfloat else 16,
         num_sanity_val_steps=0,
         fast_dev_run=fast_dev_run,
-        limit_val_batches=config.limit_val_batches,
     )
 
     print(trainer.predict(lit_classifier, loader))
