@@ -251,7 +251,7 @@ class LitUNITEClassifier(L.LightningModule):
         scheduler = torch.optim.lr_scheduler.SequentialLR(
             optim,
             [scheduler_warmup, scheduler_step],
-            [self.config.optim.decay_steps],
+            [self.config.optim.warmup_steps],
         )
 
         return {
