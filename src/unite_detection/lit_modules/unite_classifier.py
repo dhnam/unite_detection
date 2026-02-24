@@ -13,8 +13,9 @@ from torchmetrics.classification import (
     Precision,
     Recall,
 )
+from transformers import get_cosine_schedule_with_warmup
 
-from unite_detection.losses import ADLoss
+from unite_detection.losses import ADLoss, FocalLoss
 from unite_detection.models import UNITE
 from unite_detection.schemas import (
     UNITEClassifierConfig,
@@ -32,6 +33,7 @@ class LitUNITEClassifier(L.LightningModule):
 
         self.model: UNITE = UNITE(self.config.unite_model)
         self.ce_loss: nn.Module = nn.CrossEntropyLoss()
+        self.focal_loss: nn.Module = FocalLoss(gamma=2, alpha=0.5, task_type='multi-class', num_classes=2)
         self.ad_loss: ADLoss = ADLoss(self.config.ad_loss)
 
         class MetricType(TypedDict):
@@ -129,8 +131,10 @@ class LitUNITEClassifier(L.LightningModule):
             "tuple[loss_val, loss_val, loss_val, loss_val]",
             self.ad_loss(P, y, log_detail=True),
         )
-        loss_ce = cast('Float[Tensor, ""]', self.ce_loss(logit, y))
-        loss = loss_ce * self.config.loss.lambda_1 + loss_ad * self.config.loss.lambda_2
+        # loss_ce = cast('Float[Tensor, ""]', self.ce_loss(logit, y))
+        loss_focal = cast('Float[Tensor, ""]', self.focal_loss(logit, y))
+        # loss = loss_ce * self.config.loss.lambda_1 + loss_ad * self.config.loss.lambda_2
+        loss = loss_focal * self.config.loss.lambda_1 + loss_ad * self.config.loss.lambda_2
         c_magnitude = cast(
             'Float[Tensor, ""]',
             # pyright: ignore[reportUnknownMemberType]
@@ -142,7 +146,7 @@ class LitUNITEClassifier(L.LightningModule):
                 "train/loss_ad/loss_within": within,
                 "train/loss_ad/loss_between": between,
                 "train/head_dist_mean": head_dist_mean,
-                "train/loss_ce": loss_ce,
+                "train/loss_ce": loss_focal,
                 "train/loss": loss,
                 "train/C_magnitude": c_magnitude,
             },
@@ -168,10 +172,12 @@ class LitUNITEClassifier(L.LightningModule):
         )
         assert P is not None and embed is not None
         loss_ad = cast('Float[Tensor, ""]', self.ad_loss(P, y))
-        loss_ce = cast('Float[Tensor, ""]', self.ce_loss(logit, y))
-        loss = loss_ce * self.config.loss.lambda_1 + loss_ad * self.config.loss.lambda_2
+        # loss_ce = cast('Float[Tensor, ""]', self.ce_loss(logit, y))
+        loss_focal = cast('Float[Tensor, ""]', self.focal_loss(logit, y))
+        # loss = loss_ce * self.config.loss.lambda_1 + loss_ad * self.config.loss.lambda_2
+        loss = loss_focal * self.config.loss.lambda_1 + loss_ad * self.config.loss.lambda_2
         self.log("val/loss_ad", loss_ad, logger=True)
-        self.log("val/loss_ce", loss_ce, logger=True)
+        self.log("val/loss_ce", loss_focal, logger=True)
         self.log("val/loss", loss, prog_bar=True, logger=True)
 
         self.val_metrics.update(logit, y)
@@ -236,6 +242,7 @@ class LitUNITEClassifier(L.LightningModule):
     def configure_optimizers(self):
         optim = torch.optim.AdamW(self.model.parameters(), lr=self.config.optim.lr)
 
+        """
         scheduler_warmup = torch.optim.lr_scheduler.LinearLR(
             optim,
             0.001,
@@ -252,6 +259,20 @@ class LitUNITEClassifier(L.LightningModule):
             optim,
             [scheduler_warmup, scheduler_step],
             [self.config.optim.warmup_steps],
+        )
+        """
+        # 2. 전체 학습 스텝 수 계산 (Lightning의 꿀기능)
+        # 멀티 GPU나 Gradient Accumulation을 써도 알아서 계산해줍니다.
+        total_steps = int(self.trainer.estimated_stepping_batches)
+        
+        # 3. 웜업 스텝 설정 (보통 전체의 5% ~ 10%)
+        warmup_steps = int(total_steps * 0.1)
+
+
+        scheduler = get_cosine_schedule_with_warmup(
+            optim,
+            num_warmup_steps=warmup_steps,
+            num_training_steps=total_steps
         )
 
         return {
