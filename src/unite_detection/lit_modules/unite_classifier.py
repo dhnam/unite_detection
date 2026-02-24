@@ -33,7 +33,7 @@ class LitUNITEClassifier(L.LightningModule):
 
         self.model: UNITE = UNITE(self.config.unite_model)
         self.ce_loss: nn.Module = nn.CrossEntropyLoss()
-        self.focal_loss: nn.Module = FocalLoss(gamma=2, alpha=0.5, task_type='multi-class', num_classes=2)
+        self.focal_loss: nn.Module = FocalLoss(gamma=2, alpha=[0.5, 0.5], task_type='multi-class', num_classes=2)
         self.ad_loss: ADLoss = ADLoss(self.config.ad_loss)
 
         class MetricType(TypedDict):
