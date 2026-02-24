@@ -25,6 +25,8 @@ from unite_detection.schemas import (
 )
 
 type loss_val = Float[Tensor, ""]
+
+
 class LitUNITEClassifier(L.LightningModule):
     def __init__(self, config: UNITEClassifierConfig | None = None):
         super().__init__()
@@ -33,8 +35,11 @@ class LitUNITEClassifier(L.LightningModule):
 
         self.model: UNITE = UNITE(self.config.unite_model)
         self.ce_loss: nn.Module = nn.CrossEntropyLoss()
-        self.focal_loss: nn.Module = FocalLoss(gamma=2, alpha=[0.5, 0.5], task_type='multi-class', num_classes=2)
+        self.focal_loss: nn.Module = FocalLoss(
+            gamma=2, alpha=[0.5, 0.5], task_type="multi-class", num_classes=2
+        )
         self.ad_loss: ADLoss = ADLoss(self.config.ad_loss)
+        self.focal_factor = 20
 
         class MetricType(TypedDict):
             task: Literal["multiclass", "binary"]
@@ -134,7 +139,10 @@ class LitUNITEClassifier(L.LightningModule):
         # loss_ce = cast('Float[Tensor, ""]', self.ce_loss(logit, y))
         loss_focal = cast('Float[Tensor, ""]', self.focal_loss(logit, y))
         # loss = loss_ce * self.config.loss.lambda_1 + loss_ad * self.config.loss.lambda_2
-        loss = loss_focal * self.config.loss.lambda_1 + loss_ad * self.config.loss.lambda_2
+        loss = (
+            self.focal_factor * loss_focal * self.config.loss.lambda_1
+            + loss_ad * self.config.loss.lambda_2
+        )
         c_magnitude = cast(
             'Float[Tensor, ""]',
             # pyright: ignore[reportUnknownMemberType]
@@ -175,7 +183,10 @@ class LitUNITEClassifier(L.LightningModule):
         # loss_ce = cast('Float[Tensor, ""]', self.ce_loss(logit, y))
         loss_focal = cast('Float[Tensor, ""]', self.focal_loss(logit, y))
         # loss = loss_ce * self.config.loss.lambda_1 + loss_ad * self.config.loss.lambda_2
-        loss = loss_focal * self.config.loss.lambda_1 + loss_ad * self.config.loss.lambda_2
+        loss = (
+            self.focal_factor * loss_focal * self.config.loss.lambda_1
+            + loss_ad * self.config.loss.lambda_2
+        )
         self.log("val/loss_ad", loss_ad, logger=True)
         self.log("val/loss_ce", loss_focal, logger=True)
         self.log("val/loss", loss, prog_bar=True, logger=True)
@@ -264,15 +275,12 @@ class LitUNITEClassifier(L.LightningModule):
         # 2. 전체 학습 스텝 수 계산 (Lightning의 꿀기능)
         # 멀티 GPU나 Gradient Accumulation을 써도 알아서 계산해줍니다.
         total_steps = int(self.trainer.estimated_stepping_batches)
-        
+
         # 3. 웜업 스텝 설정 (보통 전체의 5% ~ 10%)
         warmup_steps = int(total_steps * 0.1)
 
-
         scheduler = get_cosine_schedule_with_warmup(
-            optim,
-            num_warmup_steps=warmup_steps,
-            num_training_steps=total_steps
+            optim, num_warmup_steps=warmup_steps, num_training_steps=total_steps
         )
 
         return {
