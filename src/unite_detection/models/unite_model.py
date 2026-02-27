@@ -1,4 +1,5 @@
 from typing import cast
+from importlib.util import find_spec
 
 import torch
 from jaxtyping import Float, Int
@@ -10,15 +11,19 @@ from unite_detection.models.vit_encoder import ViTEncoder
 from unite_detection.schemas import UNITEConfig, UNITEOutput
 from unite_detection.utils import GPUSigLIPProcessor
 
+def _check_flash_attn() -> bool:
+    return find_spec("flash_attn") is not None
+
+HAS_FLASH_ATTN = _check_flash_attn()
 
 class UNITE(nn.Module):
-    def __init__(self, config: UNITEConfig | None = None):
+    def __init__(self, config: UNITEConfig | None = None, is_export: bool=False):
         super().__init__()
 
         self.config = config or UNITEConfig()
 
         dtype = torch.bfloat16 if self.config.use_bfloat else torch.float16
-        if onnx.is_in_onnx_export():
+        if is_export or not HAS_FLASH_ATTN:
             impl = "sdpa"
         else:
             impl = "flash_attention_2"

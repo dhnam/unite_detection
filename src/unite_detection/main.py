@@ -177,7 +177,7 @@ def test(
         ),
     ] = "",
     fast_dev_run: Annotated[bool, typer.Option("--fast-dev-run")] = False,
-    use_kagglehub_login: bool = False,
+    use_kagglehub_login: bool = False
 ):
     run_id = run_id if run_id != "" else None
 
@@ -196,9 +196,7 @@ def test(
 
     datamodule = DFDataModule(config.datamodule)
     torch.serialization.add_safe_globals([PosixPath])
-    lit_classifier = LitUNITEClassifier.load_from_checkpoint(
-        ckpt_path, config=config.lit_unite
-    )
+    lit_classifier = LitUNITEClassifier.load_from_checkpoint(ckpt_path, config=config.lit_unite)
     wandb_logger: WandbLogger
     if run_id:
         wandb_logger = WandbLogger(
@@ -251,9 +249,7 @@ def predict(
         config.datamodule.loader.batch_size,
     )
     torch.serialization.add_safe_globals([PosixPath])
-    lit_classifier = LitUNITEClassifier.load_from_checkpoint(
-        ckpt_path, config=config.lit_unite
-    )
+    lit_classifier = LitUNITEClassifier.load_from_checkpoint(ckpt_path, config=config.lit_unite)
     trainer = L.Trainer(
         precision="bf16-mixed" if config.lit_unite.unite_model.use_bfloat else 16,
         num_sanity_val_steps=0,
@@ -288,9 +284,7 @@ def export(
     config = TrainConfig.model_validate(model_dict)
 
     torch.serialization.add_safe_globals([PosixPath])
-    lit_classifier = LitUNITEClassifier.load_from_checkpoint(
-        ckpt_path, config=config.lit_unite
-    )
+    lit_classifier = LitUNITEClassifier.load_from_checkpoint(ckpt_path, config=config.lit_unite, is_export=True)
     if precision == Precision.float16:
         lit_classifier = lit_classifier.half()
     if precision == Precision.float32:
@@ -300,7 +294,7 @@ def export(
         export_params=True,
         input_names=["input"],
         output_names=["output"],
-        dynamic_shapes={"input": {0: "batch_size"}, "output": {0: "batch_size"}},
+        dynamic_shapes={"x": {0: "batch_size"}}
     )
 
 
